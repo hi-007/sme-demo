@@ -1,0 +1,234 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans;
+  }
+}
+
+
+#root {
+  height: 100vh;
+}
+/* styles.css */
+.ant-form-item-label > label,
+.ant-input {
+  @apply font-sans;
+}
+
+
+.ant-form-item-label > label {
+  @apply font-sans font-bold text-lg; /* font-sans, หนา, และขนาดใหญ่ */
+}
+
+.ant-input {
+  @apply font-sans;
+}
+
+.ant-checkbox-wrappe,
+.ant-checkbox-wrapper-in-form-item {
+  align-items: flex-start !important;
+}
+
+  /* Input และ OTP */
+  .ant-input,
+  .ant-input-affix-wrapper,
+  .ant-input-number,
+  .ant-input-number-input,
+  .ant-input-otp {
+    @apply font-sans;
+  }
+
+  /* Select */
+  .ant-select-selector,
+  .ant-select-selection-item,
+  .ant-select-selection-placeholder {
+    @apply font-sans;
+  }
+
+  /* Radio */
+  .ant-radio-wrapper,
+  .ant-radio-wrapper span,
+  .ant-radio-button-label {
+    @apply font-sans;
+  }
+
+  /* TextArea */
+  .ant-input-textarea,
+  .ant-input-textarea textarea {
+    @apply font-sans;
+  }
+
+  .ant-radio-button ,
+  .ant-radio-button-checked {
+    @apply font-sans;
+  }
+
+.ant-form-item-explain-error {
+    @apply font-sans; 
+}
+  
+/* .prompt-thin {
+  font-family: "Prompt", sans-serif;
+  font-weight: 100;
+  font-style: normal;
+}
+
+.prompt-extralight {
+  font-family: "Prompt", sans-serif;
+  font-weight: 200;
+  font-style: normal;
+}
+
+.prompt-light {
+  font-family: "Prompt", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.prompt-regular {
+  font-family: "Prompt", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.prompt-medium {
+  font-family: "Prompt", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.prompt-semibold {
+  font-family: "Prompt", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.prompt-bold {
+  font-family: "Prompt", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.prompt-extrabold {
+  font-family: "Prompt", sans-serif;
+  font-weight: 800;
+  font-style: normal;
+}
+
+.prompt-black {
+  font-family: "Prompt", sans-serif;
+  font-weight: 900;
+  font-style: normal;
+}
+
+.prompt-thin-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 100;
+  font-style: italic;
+}
+
+.prompt-extralight-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 200;
+  font-style: italic;
+}
+
+.prompt-light-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.prompt-regular-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.prompt-medium-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.prompt-semibold-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.prompt-bold-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.prompt-extrabold-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 800;
+  font-style: italic;
+}
+
+.prompt-black-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 900;
+  font-style: italic;
+} */
+
+
+/* MEMU */
+
+/* ✅ Hover ของเมนูหลัก */
+.custom-menu .ant-menu-item:hover {
+  background-color: #102d47 !important;
+}
+
+/* ✅ Hover ของ Submenu Title */
+.custom-menu .ant-menu-submenu-title:hover {
+  background-color: #102d47 !important;
+}
+
+/* ✅ Hover ของ Item ข้างใน Submenu */
+.custom-menu .ant-menu-sub {
+  background-color: #08162b !important; /* คงพื้นหลังเข้ม */
+}
+
+.custom-menu .ant-menu-sub .ant-menu-item:hover {
+  background-color: #102d47 !important;
+}
+
+/* ✅ Active / Selected (เมนูหลัก + Submenu + Item ข้างใน) */
+.custom-menu .ant-menu-item-selected {
+  background-color: #102d47 !important;
+}
+
+/* ✅ เปลี่ยนสี Icon และ Text ให้ขาวตอน Hover */
+.custom-menu .ant-menu-item:hover .ant-menu-title-content,
+.custom-menu .ant-menu-item:hover .ant-menu-item-icon,
+.custom-menu .ant-menu-submenu-title:hover .ant-menu-item-icon {
+  color: #ffffff !important;
+}
+
+.custom-menu .ant-menu-item-selected .ant-menu-title-content,
+.custom-menu .ant-menu-item-selected .ant-menu-item-icon {
+  color: #ffffff !important;
+}
+
+/* ✅ เพิ่ม Animation ให้ Hover นุ่ม */
+.custom-menu .ant-menu-item,
+.custom-menu .ant-menu-submenu-title {
+  transition: background-color 0.2s ease;
+}
+
+/* ปรับขนาดกล่อง OTP ให้ใหญ่ขึ้น + ระยะห่าง */
+:where(.ant-otp) .ant-otp-input-wrapper { gap: 12px; }          /* ช่องไฟระหว่างกล่อง */
+:where(.ant-otp) .ant-otp-input { 
+  width: 64px;                                                  /* ความกว้างกล่อง */
+  height: 64px;                                                 /* ความสูงกล่อง */
+  border-radius: 12px;
+  font-size: 24px;
+
+}
