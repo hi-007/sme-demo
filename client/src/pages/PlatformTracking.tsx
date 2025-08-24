@@ -8,7 +8,8 @@ import {
   Col,
   Spin,
   message,
-  Typography
+  Typography,
+  Button
 } from "antd";
 
 
@@ -96,6 +97,7 @@ const PlatformTracking: React.FC = () => {
   }, [])
   // ------------------------------------------------------- //
   const getStatusBadge = (status: string) => {
+
     switch (status) {
       case "รอตรวจสอบ":
         return {
@@ -147,13 +149,14 @@ const PlatformTracking: React.FC = () => {
             </svg>
           ),
         };
+
       case "รอตรวจสอบ (มีการแก้ไข)":
         return {
           bg: "bg-purple-100",
           text: "text-purple-700",
           icon: (
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           ),
         };
@@ -173,8 +176,18 @@ const PlatformTracking: React.FC = () => {
 
   // ------------------------------------------------------- //
 
+  const handleEditClick = (companyId: string) => {
+    // Navigate to the form and pass the company data to pre-fill
+    navigate(`/PlatformRegis`, {
+      state: { companyId },
+    });
+  };
+
+  // ------------------------------------------------------- //
 
   return (
+
+
     <div className="min-h-screen ">
 
       <div>
@@ -223,6 +236,8 @@ const PlatformTracking: React.FC = () => {
               คำขอของคุณ
             </p>
           </div>
+
+
           {loading ? (
             <div className="flex justify-center items-center min-h-[300px]">
               <Spin size="large" />
@@ -232,6 +247,16 @@ const PlatformTracking: React.FC = () => {
           ) : (
             <div className="space-y-0">
               {companies.map((company) => (
+
+                // {loading ? (
+                //   <div className="flex justify-center items-center min-h-[300px]">
+                //     <Spin size="large" />
+                //   </div>
+                // ) : companies.length === 0 ? (
+                //   <p className="text-center text-gray-500">ยังไม่มีคำขอ</p>
+                // ) : (
+                //   <div className="space-y-0">
+                //     {companies.map((company) => (
 
                 <div className="container mx-auto px-4 lg:px-8 relative z-10">
                   <div className="max-w-4xl mx-auto">
@@ -266,6 +291,18 @@ const PlatformTracking: React.FC = () => {
                                 {getStatusBadge(company.status).icon}
                                 {company.status}
                               </div>
+
+                              {/* The Edit Request Button */}
+                              {company.status === "แก้ไขคำขอ" && (
+                                <div className="mt-4">
+                                  <Button
+                                    type="primary"
+                                    onClick={() => handleEditClick(company.id)}
+                                  >
+                                    แก้ไขคำขอ
+                                  </Button>
+                                </div>
+                              )}
 
                             </div>
                           </div>
@@ -563,7 +600,7 @@ const PlatformTracking: React.FC = () => {
                                 <h4 >หมายเหตุ :</h4>
                               </div>
                               <div>
-                                xxxx
+                                <span>{company.review_comment}</span>
                               </div>
                             </div>
                           </div>

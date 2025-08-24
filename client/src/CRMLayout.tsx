@@ -7,7 +7,7 @@ import {
     Badge,
     Avatar,
     Dropdown,
-    Card,
+    //Card,
     // Col,
     // Row
 } from "antd";
@@ -47,16 +47,17 @@ const items: MenuItem[] = [
         label: "รายงาน",
         icon: (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z" opacity="0.5" /><path strokeLinecap="round" d="M7 18V9m5 9V6m5 12v-5" /></g></svg>),
         children: [
-            { key: "9", label: "Option 9" },
-            { key: "10", label: "Option 10" },
-            {
-                key: "sub3",
-                label: "Submenu",
-                children: [
-                    { key: "11", label: "Option 11" },
-                    { key: "12", label: "Option 12" },
-                ],
-            },
+            { key: "9", label: "รายงานสถิติการลงทะเบียนเข้าร่วมโครงการ" },
+            { key: "10", label: "รายงานแบบประเมินความรู้ความเข้าใจ" },
+            { key: "11", label: "รายงานแบบประเมินความพึงพอใจ" },
+            // {
+            //     key: "sub3",
+            //     label: "Submenu",
+            //     children: [
+            //         { key: "11", label: "Option 11" },
+            //         { key: "12", label: "Option 12" },
+            //     ],
+            // },
         ],
     },
     {
@@ -89,7 +90,7 @@ const CRMLayout: React.FC = () => {
     /*---------------------------------------------------------------------------------*/
     const breadcrumbNameMap: Record<string, string> = {
         "/crm-sme": "Dashboard", // ✅ กรณีอยู่หน้า root layout
-        // "/crm-sme/dashboard": "Dashboard",
+        //"/crm-sme/dashboard": "Dashboard",
         "/crm-sme/home": "Dashboard",
         "/crm-sme/company": "ข้อมูลบริษัท/หน่วยงาน",
         "/crm-sme/platform": "บริหารจัดการคำขอการใช้งานแพลตฟอร์ม",
@@ -116,7 +117,7 @@ const CRMLayout: React.FC = () => {
                 <div
                     className={`text-white text-center py-6 text-lg font-bold transition-opacity duration-300 `}
                 >
-                    {collapsed ? "CRM" : "My CRM"}
+                    {collapsed ? "SME" : "SME DEMO"}
                 </div>
                 <Menu
                     defaultSelectedKeys={[location.pathname]}   // ✅ ให้ค่าเริ่มต้นตรงกับ URL ปัจจุบัน
@@ -126,75 +127,76 @@ const CRMLayout: React.FC = () => {
                     inlineCollapsed={collapsed}
                     selectedKeys={[location.pathname]}           // ✅ Active ตาม URL
                     items={items}
-                    className={`font-sans custom-menu bg-[#08162b] font-light ${collapsed ? "text-xs py-2" : "text-base py-2"
+                    className={`font-sans custom-menu bg-[#08162b] font-light ${collapsed ? "text-lg py-4 " : "text-base py-4"
                         } transition-all duration-300`}
-                // inlineIndent={16}
+                    inlineIndent={16}
                 />
 
             </Sider>
 
             {/* Main Content */}
             <Layout className="bg-[#f8fafd]">
-                <Header className="bg-transparent px-6 py-12 flex items-center justify-between">
+                <Header className="bg-transparent pl-6 pt-4 flex items-center justify-between">
                     {/* Left: Toggle */}
-                    <Button
-                        type="text"
-                        className="text-base w-16 h-16"
-                        onClick={() => setCollapsed(!collapsed)}
-                        icon={
-                            collapsed ? (
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <g
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="1.5"
+                    <div className="flex justify-center items-center h-full">
+                        <Button
+                            type="text"
+                            onClick={() => setCollapsed(!collapsed)}
+                            icon={
+                                collapsed ? (
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
                                     >
-                                        <path d="M12 3h-1C7.229 3 5.343 3 4.172 4.172S3 7.229 3 11v2c0 3.771 0 5.657 1.172 6.828S7.229 21 11 21h1" />
-                                        <path
-                                            strokeDasharray="2.5 3"
-                                            strokeLinecap="round"
-                                            d="M11 3h4c2.828 0 4.243 0 5.121.879C21 4.757 21 6.172 21 9v6c0 2.828 0 4.243-.879 5.121C19.243 21 17.828 21 15 21h-4"
-                                            opacity="0.5"
-                                        />
-                                        <path
-                                            strokeLinecap="round"
-                                            d="M12 2v20"
-                                        />
-                                    </g>
-                                </svg>
-                            ) : (
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <g
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="1.5"
+                                        <g
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="1.5"
+                                        >
+                                            <path d="M12 3h-1C7.229 3 5.343 3 4.172 4.172S3 7.229 3 11v2c0 3.771 0 5.657 1.172 6.828S7.229 21 11 21h1" />
+                                            <path
+                                                strokeDasharray="2.5 3"
+                                                strokeLinecap="round"
+                                                d="M11 3h4c2.828 0 4.243 0 5.121.879C21 4.757 21 6.172 21 9v6c0 2.828 0 4.243-.879 5.121C19.243 21 17.828 21 15 21h-4"
+                                                opacity="0.5"
+                                            />
+                                            <path
+                                                strokeLinecap="round"
+                                                d="M12 2v20"
+                                            />
+                                        </g>
+                                    </svg>
+                                ) : (
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
                                     >
-                                        <path d="M12 3h-1C7.229 3 5.343 3 4.172 4.172S3 7.229 3 11v2c0 3.771 0 5.657 1.172 6.828S7.229 21 11 21h1" />
-                                        <path
-                                            strokeDasharray="2.5 3"
-                                            strokeLinecap="round"
-                                            d="M11 3h4c2.828 0 4.243 0 5.121.879C21 4.757 21 6.172 21 9v6c0 2.828 0 4.243-.879 5.121C19.243 21 17.828 21 15 21h-4"
-                                            opacity="0.5"
-                                        />
-                                        <path
-                                            strokeLinecap="round"
-                                            d="M12 2v20"
-                                        />
-                                    </g>
-                                </svg>
-                            )
-                        }
-                    />
+                                        <g
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="1.5"
+                                        >
+                                            <path d="M12 3h-1C7.229 3 5.343 3 4.172 4.172S3 7.229 3 11v2c0 3.771 0 5.657 1.172 6.828S7.229 21 11 21h1" />
+                                            <path
+                                                strokeDasharray="2.5 3"
+                                                strokeLinecap="round"
+                                                d="M11 3h4c2.828 0 4.243 0 5.121.879C21 4.757 21 6.172 21 9v6c0 2.828 0 4.243-.879 5.121C19.243 21 17.828 21 15 21h-4"
+                                                opacity="0.5"
+                                            />
+                                            <path
+                                                strokeLinecap="round"
+                                                d="M12 2v20"
+                                            />
+                                        </g>
+                                    </svg>
+                                )
+                            }
+                        />
+                    </div>
 
                     {/* Right: Notifications + Profile */}
                     <div className="flex items-center gap-4">
@@ -222,24 +224,38 @@ const CRMLayout: React.FC = () => {
                         </Dropdown>
                     </div>
                 </Header>
-                <div className="flex items-center justify-between px-6 pt-4">
-                    {/* ✅ Breadcrumb */}
+
+
+                {/* <div className="flex items-end justify-between px-6 pt-8">
                     {!hideBreadcrumb && (
-                        <Card className="font-sans w-full bg-white rounded-full h-16 flex items-center justify-start border-none">
+                        <div className="font-sans">
                             <BreadcrumbNav
                                 breadcrumbNameMap={breadcrumbNameMap}
                                 homePath="/crm-sme"
                                 homeLabel="Dashboard"
                             />
-                        </Card>
+                        </div>
                     )}
+                </div> */}
 
+                <div className="font-sans mt-10 mb-0 px-8">
+                    {/* Breadcrumb */}
+                    {/* Only show Breadcrumb if not on the dashboard */}
+                    {!hideBreadcrumb && (
+                        <div className="font-sans">
+                            <BreadcrumbNav
+                                breadcrumbNameMap={breadcrumbNameMap}
+                                homePath="/crm-sme"
+                                homeLabel="Dashboard"
+                            />
+                        </div>
+                    )}
                 </div>
-                <div>
-                    <Content className="p-6">
-                        <Outlet />
-                    </Content>
-                </div>
+
+                <Content className="p-8">
+                    <Outlet />
+                </Content>
+
             </Layout>
         </Layout>
     );

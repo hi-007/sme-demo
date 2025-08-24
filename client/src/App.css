@@ -5,6 +5,7 @@
   text-align: center;
 }
 
+
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -49,3 +50,7 @@
   font-size: 20px;
 }
 
+/* เพิ่ม z-index ให้กับ Notification */
+.ant-notification {
+  z-index: 9999 !important;
+}

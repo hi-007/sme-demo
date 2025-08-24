@@ -5,6 +5,9 @@ import { supabase } from '../supabaseClient'
 import { useNavigate } from 'react-router-dom'
 import { Upload } from "lucide-react";
 
+import { useLocation } from "react-router-dom";
+
+
 const { Title, Text } = Typography
 
 const { Link } = Typography;
@@ -46,6 +49,42 @@ const PlatformRegis = () => {
 
   //----------------------------------------------------------------------------//
 
+  const location = useLocation();
+  const { companyId } = location.state || {};
+
+  const [companyData, setCompanyData] = useState<any>(null);
+
+
+  // Fetch company data by companyId
+  useEffect(() => {
+    if (companyId) {
+      setLoading(true);
+      const fetchCompanyData = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("companies")
+            .select("*")
+            .eq("id", companyId)
+            .single();
+
+          if (error) {
+            throw error;
+          }
+
+          setCompanyData(data);
+          form.setFieldsValue(data); // Pre-fill the form with fetched data
+        } catch (err) {
+          console.error("Error fetching company data:", err);
+          message.error("ไม่สามารถดึงข้อมูลบริษัทได้");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchCompanyData();
+    }
+  }, [companyId, form]);
+
   // ฟังก์ชัน formatter สำหรับแปลงค่าแสดงผลในรูปแบบเงิน
   const onChange: InputNumberProps['onChange'] = (value) => {
     console.log('changed', value);
@@ -60,7 +99,7 @@ const PlatformRegis = () => {
   //----------------------------------------------------------------------------//
 
   // watch ค่า form
-  const businessSector = Form.useWatch("businessSector", form);
+  const businessSector = Form.useWatch("business_sector", form);
   const employees = Form.useWatch("employees", form);
   const revenue = Form.useWatch("revenue", form);
   const selectedSize = Form.useWatch("sizeCategory", form); // ✅ ดูค่า sizeCategory แบบ reactive
@@ -112,12 +151,12 @@ const PlatformRegis = () => {
   useEffect(() => {
     // ถ้ายังไม่กรอกครบ 3 ช่อง ไม่ต้องเซ็ตค่า
     if (!businessSector || !employees || !revenue) {
-      form.setFieldsValue({ sizeCategory: undefined });
+      form.setFieldsValue({ size_category: undefined });
       return;
     }
 
     const size = calculateSize(businessSector, employees, revenue);
-    form.setFieldsValue({ sizeCategory: size });
+    form.setFieldsValue({ size_category: size });
   }, [businessSector, employees, revenue, form]);
 
 
@@ -151,16 +190,16 @@ const PlatformRegis = () => {
           {
             email: formData.email,
             phone: formData.phone,
-            business_type: formData.businessType,
-            business_reg_num: formData.businessRegNum,
-            owner_name: formData.ownerName,
-            business_name: formData.businessName,
-            website_name: formData.websiteName,
-            business_sector: formData.businessSector,
+            business_type: formData.business_type,
+            business_reg_num: formData.business_reg_num,
+            owner_name: formData.owner_name,
+            business_name: formData.business_name,
+            website_name: formData.website_name,
+            business_sector: formData.business_sector,
             employees: formData.employees,
             revenue: formData.revenue,
-            size_category: formData.sizeCategory,
-            industry_type: formData.industryType,
+            size_category: formData.size_category,
+            industry_type: formData.industry_type,
             dataWithRisk: formData.dataWithRisk,
             occasionalProcessing: formData.occasionalProcessing,
             section26Processing: formData.section26Processing,
@@ -327,7 +366,7 @@ const PlatformRegis = () => {
                     <Divider className="font-sans pt-4">หมวดที่ 1: ข้อมูลพื้นฐานของกิจการ</Divider>
                     <Form.Item
                       label="ประเภทธุรกิจ"
-                      name="businessType"
+                      name="business_type"
                       rules={[{ required: true, message: 'กรุณาเลือกประเภทธุรกิจ' }]}
                     >
                       <Radio.Group>
@@ -338,21 +377,21 @@ const PlatformRegis = () => {
                     </Form.Item>
                     <Form.Item
                       label="เลขทะเบียนผู้ประกอบการ SME"
-                      name="businessRegNum"
+                      name="business_reg_num"
                       rules={[{ required: true, message: 'กรุณากรอกเลขทะเบียนผู้ประกอบการ SME' }]}
                     >
                       <Input />
                     </Form.Item>
                     <Form.Item
                       label="ชื่อผู้ประกอบการ SME"
-                      name="ownerName"
+                      name="owner_name"
                       rules={[{ required: true, message: 'กรุณากรอกชื่อผู้ประกอบการ SME' }]}
                     >
                       <Input />
                     </Form.Item>
                     <Form.Item
                       label="ชื่อสถานประกอบการ SME"
-                      name="businessName"
+                      name="business_name"
                       rules={[{ required: true, message: 'กรุณากรอกชื่อสถานประกอบการ SME' }]}
                     >
                       <Input />
@@ -360,7 +399,7 @@ const PlatformRegis = () => {
 
                     <Form.Item
                       label="เว็บไซต์"
-                      name="websiteName"
+                      name="website_name"
                     >
                       <Input />
                     </Form.Item>
@@ -370,7 +409,7 @@ const PlatformRegis = () => {
                     {/* ภาคธุรกิจ */}
                     <Form.Item
                       label="ภาคธุรกิจ"
-                      name="businessSector"
+                      name="business_sector"
                       rules={[{ required: true, message: "กรุณาเลือกภาคธุรกิจ" }]}
                     >
                       <Radio.Group>
@@ -407,7 +446,7 @@ const PlatformRegis = () => {
                     {/* ขนาดกิจการ */}
                     <Form.Item
                       label="ขนาดกิจการ"
-                      name="sizeCategory"
+                      name="size_category"
                       rules={[{ required: true, message: "กรุณาเลือกขนาดกิจการ (ระบบคำนวณตามการจ้างงานและรายได้)" }]}
                     >
                       {/* <Radio.Group className="flex flex-col space-y-2" value={selectedSize}>
@@ -434,7 +473,7 @@ const PlatformRegis = () => {
 
                     {/* ประเภทอุตสาหกรรม */}
                     <Divider className="font-sans pt-4">หมวดที่ 3: ประเภทอุตสาหกรรม</Divider>
-                    <Form.Item label="ประเภทอุตสาหกรรม" name="industryType" className="" rules={[{ required: true, message: "กรุณาเลือกประเภทอุตสาหกรรม" }]}>
+                    <Form.Item label="ประเภทอุตสาหกรรม" name="industry_type" className="" rules={[{ required: true, message: "กรุณาเลือกประเภทอุตสาหกรรม" }]}>
                       <Select placeholder="เลือกประเภทอุตสาหกรรม">
                         <Select.Option value="PublicSectorStability" className="font-sans" >ด้านความมั่นคงภาครัฐ</Select.Option>
                         <Select.Option value="KeyPublicSectorServices" className="font-sans">ด้านบริการภาครัฐที่สำคัญ</Select.Option>
@@ -551,9 +590,9 @@ const PlatformRegis = () => {
 
                     <Form.Item className="flex justify-center gap-4">
                       <Button
-                        onClick={() => navigate("/termsofuse")}
+                        onClick={() => navigate("/")}
                         color="primary" variant="outlined" className="w-36 h-10 font-sans p-4 mr-2">
-                        ย้อนกลับ
+                        ยกเลิก
                       </Button>
                       <Button type="primary" htmlType="submit" className="w-36 h-10 font-sans p-4 ml-2">
                         ลงทะเบียน
@@ -628,7 +667,6 @@ const PlatformRegis = () => {
                                 {formData?.ownerName}
                               </p>
                             </div>
-
                           </Col>
                           <Col span={12}>
                             <div className="flex items-center">
@@ -642,7 +680,7 @@ const PlatformRegis = () => {
                             <div className="flex items-center">
                               <Text strong className="font-sans mr-2">เว็บไซต์:</Text>
                               <p className="font-sans">
-                                {formData?.businessName}
+                                {formData?.websiteName}
                               </p>
                             </div>
                           </Col>
@@ -930,3 +968,4 @@ const PlatformRegis = () => {
 }
 
 export default PlatformRegis
+
