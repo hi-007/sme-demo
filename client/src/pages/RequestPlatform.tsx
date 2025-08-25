@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Timeline, Drawer, Flex, Tag, Card, Table, Spin, message, Dropdown, Menu, Modal, Row, Col, Form, Input, Radio, InputNumber, Select, Checkbox, Divider, Button } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { supabase } from "../supabaseClient";
-import {MoreVertical } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 
 // import { AlertTriangle, CheckCircle2, BarChart3, MoreVertical } from "lucide-react";
 const { TextArea } = Input;
@@ -255,15 +255,28 @@ const RequestPlatform: React.FC = () => {
   //   form.setFieldsValue(record); // กำหนดค่าฟอร์มให้ตรงกับข้อมูลที่เลือก
   //   setIsModalOpen(true); // เปิด Modal
   // };
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
 
+  const handleTableChange = (pagination: any) => {
+    setPagination(pagination); // เก็บข้อมูล pagination
+  };
 
   const columns: ColumnsType<Company> = [
     {
       title: "ลำดับ",
       key: "index",
       align: "center",
-      render: (_: any, __: any, index: number) => index + 1, // เริ่มจาก 1
+      render: (_: any, __: any, index: number) => {
+        // คำนวณเลข index ตามหน้า
+        const currentPage = pagination?.current || 1;
+        const pageSize = pagination?.pageSize || 10;
+        return (currentPage - 1) * pageSize + index + 1; // รันเลขจากหน้าแรก
+      },
       width: 60,
+
     },
     {
       title: "เลขทะเบียนผู้ประกอบการ",
@@ -456,22 +469,22 @@ const RequestPlatform: React.FC = () => {
       {contextHolder}
 
       {/* <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6"> */}
-        <div className=" mx-auto space-y-6 mb-4">
-          {/* Header */}
+      <div className=" mx-auto space-y-6 mb-4">
+        {/* Header */}
 
-          {/* Dashboard Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            {/* Earnings Card */}
-            <div className="lg:col-span-1">
-              <EarningsCard />
-            </div>
+        {/* Dashboard Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          {/* Earnings Card */}
+          <div className="lg:col-span-1">
+            <EarningsCard />
+          </div>
 
-            {/* Stats Grid */}
-            <div className="lg:col-span-3 font-sans">
-              <StatsGrid />
-            </div>
+          {/* Stats Grid */}
+          <div className="lg:col-span-3 font-sans">
+            <StatsGrid />
           </div>
         </div>
+      </div>
       {/* </div> */}
 
       {/* <div className="pb-6">
@@ -592,6 +605,7 @@ const RequestPlatform: React.FC = () => {
               columns={columns}
               dataSource={companies}
               pagination={{ pageSize: 5 }}
+              onChange={handleTableChange} // ใช้ handleTableChange ในการอัพเดทหน้า
 
             />
           </div>
