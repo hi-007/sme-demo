@@ -1,5 +1,5 @@
 {
-  "homepage": "https://sme-demo.github.io/sme-project",
+  "homepage": "https://hi-007.github.io/sme-demo",
   "name": "client",
   "private": true,
   "version": "0.0.0",
@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+  "deploy": "gh-pages -d dist -m 'deploy'"
   },
   "dependencies": {
     "@fontsource/noto-sans": "^5.2.7",
