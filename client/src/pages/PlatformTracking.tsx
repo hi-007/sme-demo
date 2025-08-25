@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react"
 import { supabase } from "../supabaseClient"
 import { useNavigate } from "react-router-dom";
 import {
-
+  Tooltip,
   Divider,
   Row,
   Col,
@@ -11,7 +11,7 @@ import {
   Typography,
   Button
 } from "antd";
-
+import { EditOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 const PlatformTracking: React.FC = () => {
@@ -144,9 +144,20 @@ const PlatformTracking: React.FC = () => {
           bg: "bg-orange-100",
           text: "text-orange-700",
           icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 11l6-6 3 3-6 6H9v-3z" />
-            </svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+
+              className="w-4 h-4 mr-1"
+            >
+              <circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
           ),
         };
 
@@ -263,49 +274,57 @@ const PlatformTracking: React.FC = () => {
                     <Row>
                       <Col span={24}>
                         <div key={company.id} className="bg-white/80 backdrop-blur-sm p-6 mb-12 rounded-2xl shadow-lg border border-gray-200/50 relative overflow-hidden">
-                          <div className="flex justify-between items-start">
+                          {/* <div className="flex justify-between items-start">
                             <div>
                               <span className="text-lg font-sans font-semibold text-gray-900">
                                 {company.business_name}
                               </span>
                             </div>
                             <div className="space-y-2">
-                              {/* <span className="inline-flex items-center justify-center rounded-full bg-purple-100 px-2.5 py-0.5 text-purple-700">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="24"
-                                  height="24"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  className="-ms-1 me-1.5 size-4"
-
-                                >
-                                  <circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
-                                <p className="text-sm font-sans whitespace-nowrap">{company.status}</p>
-                              </span> */}
                               <div className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium font-sans ${getStatusBadge(company.status).bg} ${getStatusBadge(company.status).text}`}>
                                 {getStatusBadge(company.status).icon}
                                 {company.status}
                               </div>
 
-                              {/* The Edit Request Button */}
                               {company.status === "แก้ไขคำขอ" && (
                                 <div className="mt-4">
-                                  <Button
-                                    type="primary"
-                                    onClick={() => handleEditClick(company.id)}
-                                  >
-                                    แก้ไขคำขอ
-                                  </Button>
+                                  <Tooltip title="แก้ไขข้อมูล">
+                                    <Button type="dashed" shape="circle" icon={<EditOutlined />}
+                                      onClick={() => handleEditClick(company.id)}
+                                    />
+                                  </Tooltip>
                                 </div>
                               )}
+                            </div>
+                          </div>
+                           */}
+
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <span className="text-lg font-sans font-semibold text-gray-900">
+                                {company.business_name}
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-2"> {/* Use flex to align items in a row */}
+                              {/* The Edit Request Button */}
+                              {company.status === "แก้ไขคำขอ" && (
+                                <Tooltip title="แก้ไขข้อมูล">
+                                  <Button
+                                    type="dashed"
+                                    shape="circle"
+                                    icon={<EditOutlined />}
+                                    onClick={() => handleEditClick(company.id)}
+                                  />
+                                </Tooltip>
+                              )}
+                              <div className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium font-sans ${getStatusBadge(company.status).bg} ${getStatusBadge(company.status).text}`}>
+                                {getStatusBadge(company.status).icon}
+                                {company.status}
+                              </div>
 
                             </div>
                           </div>
+
                           {/* ------------------------------------------- */}
 
                           <div className="space-y-4 mt-4">

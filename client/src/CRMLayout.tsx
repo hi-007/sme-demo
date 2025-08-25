@@ -120,12 +120,12 @@ const CRMLayout: React.FC = () => {
                     {collapsed ? "SME" : "SME DEMO"}
                 </div>
                 <Menu
-                    defaultSelectedKeys={[location.pathname]}   // ✅ ให้ค่าเริ่มต้นตรงกับ URL ปัจจุบัน
-                    defaultOpenKeys={["sub1"]}                   // ✅ เปิดเมนูย่อยที่ต้องการ
+                    defaultSelectedKeys={[location.pathname]}
+                    defaultOpenKeys={["sub1"]}
                     mode="inline"
                     theme="dark"
                     inlineCollapsed={collapsed}
-                    selectedKeys={[location.pathname]}           // ✅ Active ตาม URL
+                    selectedKeys={[location.pathname]}
                     items={items}
                     className={`font-sans custom-menu bg-[#08162b] font-light ${collapsed ? "text-lg py-4 " : "text-base py-4"
                         } transition-all duration-300`}
@@ -136,7 +136,7 @@ const CRMLayout: React.FC = () => {
 
             {/* Main Content */}
             <Layout className="bg-[#f8fafd]">
-                <Header className="bg-transparent pl-6 pt-4 flex items-center justify-between">
+                <Header className="bg-transparent pl-6 pt-6 flex items-center justify-between">
                     {/* Left: Toggle */}
                     <div className="flex justify-center items-center h-full">
                         <Button
@@ -217,7 +217,8 @@ const CRMLayout: React.FC = () => {
                             arrow
                         >
                             <Avatar
-                                size="large"
+                            style={{ backgroundColor: '#f56a00' }} size="large"
+                                //size="large"
                                 icon={<UserOutlined />}
                                 className="cursor-pointer "
                             />

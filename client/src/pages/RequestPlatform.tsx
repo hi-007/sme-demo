@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Drawer, Flex, Tag, Card, Table, Spin, message, Dropdown, Menu, Modal, Row, Col, Form, Input, Radio, InputNumber, Select, Checkbox, Divider, Button } from "antd";
+import { Timeline, Drawer, Flex, Tag, Card, Table, Spin, message, Dropdown, Menu, Modal, Row, Col, Form, Input, Radio, InputNumber, Select, Checkbox, Divider, Button } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { supabase } from "../supabaseClient";
-import { AlertTriangle, CheckCircle2, BarChart3, MoreVertical } from "lucide-react";
+import {MoreVertical } from "lucide-react";
+
+// import { AlertTriangle, CheckCircle2, BarChart3, MoreVertical } from "lucide-react";
 const { TextArea } = Input;
-import { DownloadOutlined } from '@ant-design/icons';
+import { DownloadOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { notification } from "antd";
+import { EarningsCard } from '../components/EarningsCard';
+import { StatsGrid } from '../components/StatsGrid';
+
 
 
 interface Company {
@@ -15,14 +21,16 @@ interface Company {
   email: string;
   status: string;
   created_at: string;
+  updated_at: string;
   size_category: string;
   business_type: string;
 }
 
-
 const RequestPlatform: React.FC = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(false);
+  // -------------------------------------//
+
   // -------------------------------------//
 
   const [form] = Form.useForm(); // ใช้ form instance
@@ -36,18 +44,6 @@ const RequestPlatform: React.FC = () => {
   const [confirmStatus, setConfirmStatus] = useState(""); // The selected status for confirmation
   const [loadings, setLoadings] = useState(false); // Loading state for the buttons
 
-  const [successAlert, setSuccessAlert] = useState(false); // To control showing success alert
-
-
-  // const handleMenuClick = ({ key }: { key: string }) => {
-  //   if (key === "view") {
-  //     setIsModalOpen(true);
-  //   } else if (key === "edit") {
-  //     console.log("ประวัติการแก้ไข");
-  //   } else if (key === "delete") {
-  //     console.log("ลบข้อมูล");
-  //   }
-  // };
 
   // ฟังก์ชัน handle เมนูที่คลิก
   const handleMenuClick = ({ key }: { key: string }, record: any) => {
@@ -88,28 +84,9 @@ const RequestPlatform: React.FC = () => {
   };
   // -------------------------------------//
 
+  // ✅ ใช้ notification hook
+  const [api, contextHolder] = notification.useNotification();
 
-  // useEffect(() => {
-  //   const fetchCompanies = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const { data, error } = await supabase
-  //         .from("companies")
-  //         .select("*")
-  //         .order("created_at", { ascending: false });
-  //       if (error) throw error;
-  //       if (data) {
-  //         setCompanies(data as Company[]);
-  //       }
-  //     } catch (err: any) {
-  //       console.error("Fetch error:", err);
-  //       message.error("โหลดข้อมูลไม่สำเร็จ");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchCompanies();
-  // }, []);
 
   // Fetch companies from Supabase
   const fetchCompanies = async () => {
@@ -162,6 +139,35 @@ const RequestPlatform: React.FC = () => {
     setIsConfirmModalOpen(true); // เปิด Modal ยืนยัน
   };
 
+  // const handleStatusUpdate = async () => {
+  //   if (!selectedCompany) return;
+
+  //   try {
+  //     setLoadings(true);
+
+  //     const { error } = await supabase
+  //       .from("companies")
+  //       .update({
+  //         status: confirmStatus,
+  //         review_comment: reviewComment,
+  //       })
+  //       .eq("id", selectedCompany.id);
+
+  //     if (error) throw new Error(error.message);
+
+  //     setSelectedCompany({ ...selectedCompany, status: confirmStatus });
+  //     setIsConfirmModalOpen(false);
+  //     setIsModalOpen(false);
+  //     fetchCompanies();
+
+
+  //   } catch (err) {
+  //     message.error("ไม่สามารถอัปเดตสถานะได้");
+  //     console.error(err);
+  //   } finally {
+  //     setLoadings(false);
+  //   }
+  // };
   const handleStatusUpdate = async () => {
     if (!selectedCompany) return;
 
@@ -176,21 +182,33 @@ const RequestPlatform: React.FC = () => {
         })
         .eq("id", selectedCompany.id);
 
-      if (error) throw new Error(error.message);
+      if (error) throw error;
+
+      api.success({
+        message: "ข้อมูลอัปเดตสำเร็จ",
+        description: "สถานะของคำขอถูกอัปเดตเรียบร้อยแล้ว",
+        placement: "topRight",
+        className: "font-sans text-gray-900", // Customize font here
+
+      });
 
       setSelectedCompany({ ...selectedCompany, status: confirmStatus });
       setIsConfirmModalOpen(false);
       setIsModalOpen(false);
       fetchCompanies();
-
-     
     } catch (err) {
-      message.error("ไม่สามารถอัปเดตสถานะได้");
       console.error(err);
+      api.error({
+        message: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถอัปเดตสถานะได้ กรุณาลองใหม่",
+        placement: "topRight",
+      });
     } finally {
       setLoadings(false);
     }
   };
+
+
   // const handleStatusUpdate = async () => {
   //   if (!selectedCompany) return;
 
@@ -435,21 +453,28 @@ const RequestPlatform: React.FC = () => {
 
   return (
     <>
-      {/* Success Alert */}
-      {successAlert && (
-        <Alert
-          message="Success"
-          description="The status has been updated successfully."
-          type="success"
-          showIcon
-          closable
-          onClose={() => setSuccessAlert(false)}
-          style={{ marginBottom: 16 }}
-        />
-      )}
+      {contextHolder}
 
+      {/* <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6"> */}
+        <div className=" mx-auto space-y-6 mb-4">
+          {/* Header */}
 
-      <div className="pb-6">
+          {/* Dashboard Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            {/* Earnings Card */}
+            <div className="lg:col-span-1">
+              <EarningsCard />
+            </div>
+
+            {/* Stats Grid */}
+            <div className="lg:col-span-3 font-sans">
+              <StatsGrid />
+            </div>
+          </div>
+        </div>
+      {/* </div> */}
+
+      {/* <div className="pb-6">
         <Row gutter={[16, 16]}>
           <Col span={6}>
             <Card className="w-full bg-white rounded-2xl border-none shadow-sm">
@@ -471,7 +496,6 @@ const RequestPlatform: React.FC = () => {
                     ></div>
                   </div>
                   <span className="ml-2 text-xs text-muted-foreground">
-                    {/* {Math.round((riskMetrics.medium / totalRisks) * 100)}% */}
                   </span>
                 </div>
               </div>
@@ -493,11 +517,9 @@ const RequestPlatform: React.FC = () => {
                   <div className="w-full bg-orange-200 rounded-full h-2">
                     <div
                       className="bg-orange-500 h-2 rounded-full"
-                    // style={{ width: `${(riskMetrics.high / totalRisks) * 100}%` }}
                     ></div>
                   </div>
                   <span className="ml-2 text-xs text-muted-foreground">
-                    {/* {Math.round((riskMetrics.high / totalRisks) * 100)}% */}
 
                   </span>
                 </div>
@@ -520,11 +542,9 @@ const RequestPlatform: React.FC = () => {
                   <div className="w-full bg-yellow-200 rounded-full h-2">
                     <div
                       className="bg-yellow-500 h-2 rounded-full"
-                    // style={{ width: `${(riskMetrics.medium / totalRisks) * 100}%` }}
                     ></div>
                   </div>
                   <span className="ml-2 text-xs text-muted-foreground">
-                    {/* {Math.round((riskMetrics.medium / totalRisks) * 100)}% */}
                   </span>
                 </div>
               </div>
@@ -546,11 +566,9 @@ const RequestPlatform: React.FC = () => {
                   <div className="w-full bg-green-200 rounded-full h-2">
                     <div
                       className="bg-green-500 h-2 rounded-full"
-                    // style={{ width: `${(riskMetrics.low / totalRisks) * 100}%` }}
                     ></div>
                   </div>
                   <span className="ml-2 text-xs text-muted-foreground">
-                    {/* {Math.round((riskMetrics.low / totalRisks) * 100)}% */}
 
                   </span>
                 </div>
@@ -558,7 +576,7 @@ const RequestPlatform: React.FC = () => {
             </Card>
           </Col>
         </Row>
-      </div>
+      </div> */}
 
       <Card className="w-full bg-white rounded-2xl border-none shadow-sm">
         <h1 className="text-xl font-bold mb-4 font-sans ">คำขอใช้งานแพลตฟอร์ม</h1>
@@ -582,20 +600,19 @@ const RequestPlatform: React.FC = () => {
       </Card>
       <Modal
         open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)} // ปุ่มปิดภายในยังใช้ได้
+        onCancel={() => setIsModalOpen(false)}
         footer={null}
-        closable={false} // เอา X ของ AntD ออก
-        maskClosable={false} // ❌ ไม่สามารถคลิกนอก modal เพื่อปิด
+        closable={false}
+        maskClosable={false}
         width="95%"
         className="!max-w-full"
+        style={{ top: 20, padding: 0 }} // Use style here for height
 
-        style={{ top: 30, padding: 0 }}
-        bodyStyle={{ height: "90vh", padding: 0, overflow: "hidden" }}
-      //maskStyle={{ overflow: "hidden" }}
       >
-        <div className="flex flex-col h-full bg-white font-sans">
+
+        <div className="flex flex-col h-[90vh] bg-white font-sans overflow-hidden mt-2">
           {/* Header */}
-          <div className="flex justify-between items-center py-3 px-4 border-b border-gray-200">
+          <div className="flex justify-between items-center pb-4 px-0 border-b border-gray-200">
             <h4 className="font-bold text-gray-700 text-lg">พิจารณาคำขอลงทะเบียน : {selectedCompany?.business_name}</h4>
             <button
               type="button"
@@ -822,10 +839,10 @@ const RequestPlatform: React.FC = () => {
                           <li className="marker:text-blue-600">
                             <div className="flex justify-between items-center">
                               <span>หนังสือรับรองการขึ้นทะเบียนผู้ประกอบการ SME</span>
-                              <button className="text-blue-600 hover:text-blue-800">
+                              <p className="text-blue-600 hover:text-blue-800">
                                 <Button color="primary" variant="filled" shape="circle" icon={<DownloadOutlined />} size="middle" />
 
-                              </button>
+                              </p>
                             </div>
                           </li>
 
@@ -833,18 +850,18 @@ const RequestPlatform: React.FC = () => {
                             <div className="flex justify-between items-center">
                               <span>
                                 หนังสือรับรองการจดทะเบียนบริษัท</span>
-                              <button className="text-blue-600 hover:text-blue-800">
+                              <p className="text-blue-600 hover:text-blue-800">
                                 <Button color="primary" variant="filled" shape="circle" icon={<DownloadOutlined />} size='middle' />
-                              </button>
+                              </p>
                             </div>
                           </li>
 
                           <li className="marker:text-blue-600">
                             <div className="flex justify-between items-center">
                               <span>หนังสืออนุมัติจากผู้บริหารเพื่อขอรับการสนับสนุนเพื่อปฏิบัติตามกฎหมายคุ้มครองข้อมูลส่วนบุคคล</span>
-                              <button className="text-blue-600 hover:text-blue-800">
+                              <p className="text-blue-600 hover:text-blue-800">
                                 <Button color="primary" variant="filled" shape="circle" icon={<DownloadOutlined />} size="middle" />
-                              </button>
+                              </p>
 
                             </div>
                           </li>
@@ -861,7 +878,16 @@ const RequestPlatform: React.FC = () => {
                   <Card className="w-full bg-white rounded-xl border-lg shadow-md">
                     <p className="text-lg font-medium text-gray-800 font-sans">ผลการพิจารณา</p>
                     <p className="text-md font-medium text-gray-600 font-sans pt-2">สถานปัจจุบัน : <Tag color="green" className="font-sans"> {selectedCompany?.status} </Tag></p>
-                    <br />
+                    <div className="py-4">
+                      <span className="text-md font-sans text-gray-600">
+                        ส่งเมื่อ: {selectedCompany?.created_at ? new Date(selectedCompany.created_at).toLocaleString() : 'ข้อมูลไม่พร้อม'}
+                      </span>
+                      <br />
+                      <span className="text-md font-sans text-gray-600">
+                        อัปเดตเมื่อ: {selectedCompany?.updated_at ? new Date(selectedCompany.updated_at).toLocaleString() : 'ข้อมูลไม่พร้อม'}
+                      </span>
+                    </div>
+
                     <div className="pb-6">
                       {/* <p className="text-md font-medium text-gray-800 font-sans">หมายเหตุการพิจารณา </p> */}
                       {/* <TextArea
@@ -927,8 +953,13 @@ const RequestPlatform: React.FC = () => {
       {/* Confirmation Modal */}
       {/* Modal ยืนยันการอัปเดตสถานะ */}
       <Modal
-        title="ยืนยันการอัปเดตสถานะ"
-        visible={isConfirmModalOpen}
+        // title="ยืนยันการอัปเดตสถานะ"
+        title={
+          <div className="flex items-center">
+            <ExclamationCircleOutlined className="mr-2 text-yellow-600 text-2xl" />
+            <p className="text-lg">ยืนยันการอัปเดตสถานะ</p>
+          </div>
+        } open={isConfirmModalOpen}
         onCancel={() => setIsConfirmModalOpen(false)}
         onOk={handleStatusUpdate}
         confirmLoading={loadings}
@@ -945,7 +976,7 @@ const RequestPlatform: React.FC = () => {
         className="font-sans"
       >
         {/* <p>กรุณายืนยันการอัปเดตสถานะของคำขอ</p> */}
-        <p>สถานะที่จะอัปเดตเป็น: {confirmStatus}</p>
+        <p className="my-2">สถานะที่จะอัปเดตเป็น: {confirmStatus}</p>
         <TextArea
           rows={4}
           placeholder="กรุณากรอกเหตุผลในการพิจารณา"
@@ -965,7 +996,22 @@ const RequestPlatform: React.FC = () => {
         open={isDrawerOpen}
         width={500}
       >
-        {/* เนื้อหาประวัติการแก้ไข */}
+        <Timeline
+          items={[
+            {
+              children: 'Create a services site 2015-09-01',
+            },
+            {
+              children: 'Solve initial network problems 2015-09-01',
+            },
+            {
+              children: 'Technical testing 2015-09-01',
+            },
+            {
+              children: 'Network problems being solved 2015-09-01',
+            },
+          ]}
+        />
 
         {/* คุณสามารถ map ข้อมูลจริงมาที่นี่ได้ */}
       </Drawer>

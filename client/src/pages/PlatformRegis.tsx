@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { Form, Input, Radio, InputNumber, Select, Checkbox, Divider, Button, Modal, Row, Col, Typography, message } from 'antd'
 import { supabase } from '../supabaseClient'
 import { useNavigate } from 'react-router-dom'
-import { Upload } from "lucide-react";
+//import { Upload } from "lucide-react";
 
 import { useLocation } from "react-router-dom";
+import { UploadOutlined } from '@ant-design/icons';
 
 
 const { Title, Text } = Typography
@@ -55,9 +56,37 @@ const PlatformRegis = () => {
   const [companyData, setCompanyData] = useState<any>(null);
 
 
-  // Fetch company data by companyId
+  // useEffect(() => {
+  //   if (companyId) {
+  //     setLoading(true);
+  //     const fetchCompanyData = async () => {
+  //       try {
+  //         const { data, error } = await supabase
+  //           .from("companies")
+  //           .select("*")
+  //           .eq("id", companyId)
+  //           .single();
+
+  //         if (error) {
+  //           throw error;
+  //         }
+
+  //         setCompanyData(data);
+  //         form.setFieldsValue(data);
+  //       } catch (err) {
+  //         console.error("Error fetching company data:", err);
+  //         message.error("ไม่สามารถดึงข้อมูลบริษัทได้");
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     };
+
+  //     fetchCompanyData();
+  //   }
+  // }, [companyId, form]);
+
   useEffect(() => {
-    if (companyId) {
+    if (companyId && !companyData) { // Added check to ensure data isn't already set
       setLoading(true);
       const fetchCompanyData = async () => {
         try {
@@ -71,8 +100,8 @@ const PlatformRegis = () => {
             throw error;
           }
 
-          setCompanyData(data);
-          form.setFieldsValue(data); // Pre-fill the form with fetched data
+          setCompanyData(data);  // Set fetched data into state
+          form.setFieldsValue(data);  // Pre-fill form with fetched data
         } catch (err) {
           console.error("Error fetching company data:", err);
           message.error("ไม่สามารถดึงข้อมูลบริษัทได้");
@@ -83,7 +112,8 @@ const PlatformRegis = () => {
 
       fetchCompanyData();
     }
-  }, [companyId, form]);
+  }, [companyId, form, companyData]);  // Adding companyData as a dependency to avoid redundant fetches
+
 
   // ฟังก์ชัน formatter สำหรับแปลงค่าแสดงผลในรูปแบบเงิน
   const onChange: InputNumberProps['onChange'] = (value) => {
@@ -102,7 +132,7 @@ const PlatformRegis = () => {
   const businessSector = Form.useWatch("business_sector", form);
   const employees = Form.useWatch("employees", form);
   const revenue = Form.useWatch("revenue", form);
-  const selectedSize = Form.useWatch("sizeCategory", form); // ✅ ดูค่า sizeCategory แบบ reactive
+  const selectedSize = Form.useWatch("size_category", form); // ✅ ดูค่า sizeCategory แบบ reactive
 
   // ฟังก์ชันคำนวณขนาดกิจการ
   const calculateSize = (
@@ -162,103 +192,95 @@ const PlatformRegis = () => {
 
   //----------------------------------------------------------------------------//
 
-
-
   const [formData, setFormData] = useState<any>(null)
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false)
 
   const handleSubmit = (values: any) => {
     // เพิ่ม sizeCategory ลงใน formData เผื่อ Modal ใช้งาน
-    const size = calculateSize(values.businessSector, values.employees, values.revenue);
-    setFormData({ ...values, sizeCategory: size });
+    //const size = calculateSize(values.businessSector, values.employees, values.revenue);
+    // setFormData({ ...values, size_category: size });
+    setFormData(values);
     setIsModalVisible(true);
   };
 
   const [loading, setLoading] = useState(false) // ✅ เพิ่ม state loading
 
-
-  const handleConfirm = async () => {
-    if (!formData) return
-
-    setLoading(true) // เริ่มแสดง Spinner
-    try {
-
-      const { error } = await supabase
-        .from('companies')
-        .insert([
-          {
-            email: formData.email,
-            phone: formData.phone,
-            business_type: formData.business_type,
-            business_reg_num: formData.business_reg_num,
-            owner_name: formData.owner_name,
-            business_name: formData.business_name,
-            website_name: formData.website_name,
-            business_sector: formData.business_sector,
-            employees: formData.employees,
-            revenue: formData.revenue,
-            size_category: formData.size_category,
-            industry_type: formData.industry_type,
-            dataWithRisk: formData.dataWithRisk,
-            occasionalProcessing: formData.occasionalProcessing,
-            section26Processing: formData.section26Processing,
-            participations: formData.participations,
-            status: "รอตรวจสอบ",
-          },
-        ])
-
-
-      if (error) {
-        console.error('Insert error:', error)
-        message.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล')
-        return
-      }
-
-      setIsModalVisible(false)
-      setIsSuccessModalVisible(true)
-    } finally {
-      setLoading(false) // ปิด Spinner
-    }
-  }
-
   // const handleConfirm = async () => {
   //   if (!formData) return
 
-  //   const { data, error } = await supabase
-  //     .from('companies')
-  //     .insert([
-  //       {
-  //         email: formData.email,
-  //         phone: formData.phone,
-  //         business_type: formData.businessType,
-  //         business_reg_num: formData.businessRegNum,
-  //         owner_name: formData.ownerName,
-  //         business_name: formData.businessName,
-  //         website_name: formData.websiteName,
-  //         business_sector: formData.businessSector,
-  //         employees: formData.employees,
-  //         revenue: formData.revenue,
-  //         size_category: formData.sizeCategory,
-  //         industry_type: formData.industryType,
-  //         dataWithRisk: formData.dataWithRisk,
-  //         occasionalProcessing: formData.occasionalProcessing,
-  //         section26Processing: formData.section26Processing,
-  //         participations: formData.participations,
-  //       },
-  //     ])
+  //   setLoading(true) // เริ่มแสดง Spinner
+  //   try {
 
-  //   if (error) {
-  //     console.error('Insert error:', error)
-  //     message.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล')
-  //     return
+  //     const { error } = await supabase
+  //       .from('companies')
+  //       .insert([
+  //         {
+  //           email: formData.email,
+  //           phone: formData.phone,
+  //           business_type: formData.business_type,
+  //           business_reg_num: formData.business_reg_num,
+  //           owner_name: formData.owner_name,
+  //           business_name: formData.business_name,
+  //           website_name: formData.website_name,
+  //           business_sector: formData.business_sector,
+  //           employees: formData.employees,
+  //           revenue: formData.revenue,
+  //           size_category: formData.size_category,
+  //           industry_type: formData.industry_type,
+  //           dataWithRisk: formData.dataWithRisk,
+  //           occasionalProcessing: formData.occasionalProcessing,
+  //           section26Processing: formData.section26Processing,
+  //           participations: formData.participations,
+  //           status: "รอตรวจสอบ",
+  //         },
+  //       ])
+
+
+  //     if (error) {
+  //       console.error('Insert error:', error)
+  //       message.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล')
+  //       return
+  //     }
+
+  //     setIsModalVisible(false)
+  //     setIsSuccessModalVisible(true)
+  //   } finally {
+  //     setLoading(false) // ปิด Spinner
   //   }
-
-  //   setIsModalVisible(false)
-  //   setIsSuccessModalVisible(true)
   // }
+  const handleConfirm = async () => {
+    if (!formData) return;
+
+    setLoading(true); // เริ่มแสดง Spinner
+
+    try {
+      const { error } = companyId
+        ? await supabase.from("companies").update({
+          ...formData,
+          size_category: formData.size_category,
+
+          status: "รอตรวจสอบ (มีการแก้ไข)" // เปลี่ยนสถานะเมื่อแก้ไข
+        }).eq("id", companyId)
+        : await supabase.from("companies").insert([{
+          ...formData,
+          status: "รอตรวจสอบ"
+        }]);
+
+      if (error) throw error;
+
+      setIsModalVisible(false);
+      setIsSuccessModalVisible(true); // เปิด Modal Success
+    } catch (err) {
+      console.error("Error during submission:", err);
+      message.error("ไม่สามารถบันทึกข้อมูลได้");
+    } finally {
+      setLoading(false); // ปิด Spinner
+    }
+  };
 
   const handleCloseModal = () => setIsModalVisible(false)
+
   const handleCloseSuccessModal = () => {
     setIsSuccessModalVisible(false)
     form.resetFields()
@@ -306,7 +328,6 @@ const PlatformRegis = () => {
             >
               SME DEMO
             </button>
-
             <a className="my-1 text-sm font-medium text-gray-500 rtl:-scale-x-100 hover:text-blue-500 lg:mx-4 lg:my-0" href="#">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
@@ -318,25 +339,19 @@ const PlatformRegis = () => {
           <div className="container mx-auto px-4 lg:px-8 relative z-10">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-6">
-
                 <h1 className="text-3xl font-semibold text-gray-800 lg:text-4xl">แบบฟอร์มแจ้งความประสงค์ </h1>
                 <p className="text-xl text-gray-600 mt-4">
                   ขอรับการสนับสนุนเพื่อปฏิบัติตามกฎหมายคุ้มครองข้อมูลส่วนบุคคล
                   <br />
                   ภายใต้โครงการแพลตฟอร์มเพื่อสนับสนุนการปฏิบัติตามกฎหมายคุ้มครองข้อมูลส่วนบุคคลสำหรับภาคเอกชน สำนักงานคณะกรรมการคุ้มครองข้อมูลส่วนบุคคล
-
                 </p>
               </div>
 
               <div className="grid lg:grid-cols-1 gap-12 ">
-                {/* Contact Info */}
-
-
                 {/* Contact Form with Enhanced Design */}
                 <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-gray-200/50 relative overflow-hidden">
                   {/* Form background decoration */}
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-gray-100 to-gray-200 rounded-full opacity-30 -translate-y-16 translate-x-16"></div>
-
                   <Form
                     form={form}
                     layout="vertical"
@@ -353,7 +368,6 @@ const PlatformRegis = () => {
                     >
                       <Input />
                     </Form.Item>
-
                     <Form.Item
                       label="หมายเลขโทรศัพท์ผู้ประสานงาน"
                       name="phone"
@@ -361,7 +375,6 @@ const PlatformRegis = () => {
                     >
                       <Input />
                     </Form.Item>
-
                     {/* ข้อมูลพื้นฐานของกิจการ */}
                     <Divider className="font-sans pt-4">หมวดที่ 1: ข้อมูลพื้นฐานของกิจการ</Divider>
                     <Form.Item
@@ -396,7 +409,6 @@ const PlatformRegis = () => {
                     >
                       <Input />
                     </Form.Item>
-
                     <Form.Item
                       label="เว็บไซต์"
                       name="website_name"
@@ -405,7 +417,6 @@ const PlatformRegis = () => {
                     </Form.Item>
                     {/* ขนาดกิจการ */}
                     <Divider className="font-sans pt-4">หมวดที่ 2: ประเมินขนาดกิจการ</Divider>
-
                     {/* ภาคธุรกิจ */}
                     <Form.Item
                       label="ภาคธุรกิจ"
@@ -417,7 +428,6 @@ const PlatformRegis = () => {
                         <Radio value="trade_service">ภาคการค้า/การบริการ</Radio>
                       </Radio.Group>
                     </Form.Item>
-
                     {/* จำนวนพนักงาน */}
                     <Form.Item
                       label="จำนวนพนักงาน"
@@ -426,15 +436,12 @@ const PlatformRegis = () => {
                     >
                       <InputNumber min={1} className="w-full" />
                     </Form.Item>
-
                     {/* รายได้ */}
-
                     <Form.Item
                       label="รายได้ของกิจการ (บาท/ปี)"
                       name="revenue"
                       rules={[{ required: true, message: "กรุณากรอกรายได้ของกิจการ" }]}
                     >
-
                       <InputNumber<number>
                         className="w-full"
                         formatter={formatter}
@@ -442,7 +449,6 @@ const PlatformRegis = () => {
                         onChange={onChange}
                       />
                     </Form.Item>
-
                     {/* ขนาดกิจการ */}
                     <Form.Item
                       label="ขนาดกิจการ"
@@ -456,7 +462,6 @@ const PlatformRegis = () => {
                           </Radio>
                         ))}
                       </Radio.Group> */}
-
                       <Radio.Group className="flex flex-col space-y-2">
                         {sizeOptions.map((opt) => (
                           <Radio
@@ -555,38 +560,33 @@ const PlatformRegis = () => {
                       <li className="marker:text-blue-600">
                         <div className="flex justify-between items-center">
                           <span>หนังสือรับรองการขึ้นทะเบียนผู้ประกอบการ SME</span>
-                          <button className="text-blue-600 hover:text-blue-800">
-                            <Upload className="w-5 h-5" />
-                          </button>
+                          <p className="text-blue-600 hover:text-blue-800">
+                            <Button color="primary" variant="filled" shape="circle" icon={<UploadOutlined />} size="middle" />
+                          </p>
                         </div>
                       </li>
-
                       <li className="marker:text-blue-600">
                         <div className="flex justify-between items-center">
-                          <span>หนังสือรับรองการจดทะเบียนบริษัท</span>
-                          <button className="text-blue-600 hover:text-blue-800">
-                            <Upload className="w-5 h-5" />
-                          </button>
+                          <span>
+                            หนังสือรับรองการจดทะเบียนบริษัท</span>
+                          <p className="text-blue-600 hover:text-blue-800">
+                            <Button color="primary" variant="filled" shape="circle" icon={<UploadOutlined />} size='middle' />
+                          </p>
                         </div>
                       </li>
-
                       <li className="marker:text-blue-600">
                         <div className="flex justify-between items-center">
                           <span>หนังสืออนุมัติจากผู้บริหารเพื่อขอรับการสนับสนุนเพื่อปฏิบัติตามกฎหมายคุ้มครองข้อมูลส่วนบุคคล</span>
-                          <button className="text-blue-600 hover:text-blue-800">
-                            <Upload className="w-5 h-5" />
-                          </button>
-
+                          <p className="text-blue-600 hover:text-blue-800">
+                            <Button color="primary" variant="filled" shape="circle" icon={<UploadOutlined />} size="middle" />
+                          </p>
                         </div>
                       </li>
                       <Link href="#" target="_blank" className="font-sans">
                         ดาวน์โหลดไฟล์
                       </Link>
                     </ul>
-
                     {/* ปุ่ม Submit */}
-
-
 
                     <Form.Item className="flex justify-center gap-4">
                       <Button
@@ -600,20 +600,19 @@ const PlatformRegis = () => {
                     </Form.Item>
                   </Form>
 
-                  {/* Modal สำหรับแสดงรายละเอียด */}
+                  {/* Modal สำหรับแสดงรายละเอียด ก่อนบันทึก*/}
                   <Modal
                     title={<span className="text-2xl font-semibold flex justify-center pb-4">ตรวจสอบรายละเอียดการลงทะเบียน</span>}  // ใช้ Tailwind สำหรับการเพิ่มขนาดตัวอักษร
                     open={isModalVisible}
                     onOk={handleConfirm}
                     onCancel={handleCloseModal}
-                    closable={false} // ปิดไอคอนปิดที่มุมขวาบน
-                    width={900} // ปรับขนาด Modal ให้กว้างขึ้น
-                    footer={null}  // ลบ footer เดิมออก
-                    maskClosable={false} // ป้องกันการคลิกนอก Modal เพื่อปิด
+                    closable={false}
+                    width={900}
+                    footer={null}
+                    maskClosable={false}
                     className="font-sans"
                     style={{ top: 26 }}
                   >
-
                     {/* ทำให้เนื้อหา scroll */}
                     <div className="overflow-y-auto overflow-x-hidden max-h-[82vh]">
                       <span className="flex justify-center mb-4 text-gray-500" >กรุณาตรวจสอบรายละเอียดการลงทะเบียนก่อนยืนยัน</span>
@@ -654,17 +653,16 @@ const PlatformRegis = () => {
                             <div className="flex items-center">
                               <Text strong className="font-sans mr-2">เลขทะเบียนผู้ประกอบการ SME:</Text>
                               <p className="font-sans">
-                                {formData?.businessRegNum}                              
-                                </p>
+                                {formData?.business_reg_num}
+                              </p>
                             </div>
                           </Col>
-
 
                           <Col span={12}>
                             <div className="flex items-center">
                               <Text strong className="font-sans mr-2">ชื่อผู้ประกอบการ SME:</Text>
                               <p className="font-sans">
-                                {formData?.ownerName}
+                                {formData?.owner_name}
                               </p>
                             </div>
                           </Col>
@@ -672,7 +670,7 @@ const PlatformRegis = () => {
                             <div className="flex items-center">
                               <Text strong className="font-sans mr-2">ชื่อสถานประกอบการ SME:</Text>
                               <p className="font-sans">
-                                {formData?.businessName}
+                                {formData?.business_name}
                               </p>
                             </div>
                           </Col>
@@ -680,7 +678,7 @@ const PlatformRegis = () => {
                             <div className="flex items-center">
                               <Text strong className="font-sans mr-2">เว็บไซต์:</Text>
                               <p className="font-sans">
-                                {formData?.websiteName}
+                                {formData?.website_name}
                               </p>
                             </div>
                           </Col>
@@ -693,14 +691,11 @@ const PlatformRegis = () => {
 
                         <Row gutter={[16, 16]} className="pl-4">
                           <Col span={12}>
-
                             <div className="flex items-center">
                               <Text strong className="font-sans mr-2">ภาคธุรกิจ:</Text>
                               <p className="font-sans">
                                 {formData?.businessSector === 'manufacturing' ? 'ภาคการผลิต' : 'ภาคการค้า/การบริการ'}                              </p>
                             </div>
-
-
                           </Col>
                           <Col span={12}>
                             <div className="flex items-center">
@@ -722,7 +717,7 @@ const PlatformRegis = () => {
                             <div className="flex items-center">
                               <Text strong className="font-sans mr-2">ขนาดกิจการ:</Text>
                               <p className="font-sans">
-                                {sizeOptions.find(opt => opt.value === formData?.sizeCategory)?.label || 'ข้อมูลไม่ครบถ้วน'}
+                                {sizeOptions.find(opt => opt.value === formData?.size_category)?.label || 'ข้อมูลไม่ครบถ้วน'}
                               </p>
 
                             </div>
@@ -732,7 +727,6 @@ const PlatformRegis = () => {
                       <Divider></Divider>
                       <div className="mb-4">
                         <Title level={4} className="font-sans">การดำเนินการของหน่วยงาน</Title>
-
                         <Row gutter={[16, 16]} className="">
                           <Col span={24}>
                             <div className="flex items-center py-2">
@@ -775,7 +769,6 @@ const PlatformRegis = () => {
                               </li>
                             </ul>
                           </Col>
-
                         </Row>
 
                         <Row gutter={[16, 16]} className="">
@@ -800,12 +793,10 @@ const PlatformRegis = () => {
                               </ul>
                             </div>
                           </Col>
-
                         </Row>
                       </div>
                       {/* เพิ่มรายละเอียดหมวดที่ 3 */}
                       <Divider></Divider>
-
                       <div className="mb-4">
                         <Title level={4} className="font-sans">ประเภทอุตสาหกรรม</Title>
                         <Row gutter={[16, 16]} className="pl-6">
@@ -817,7 +808,7 @@ const PlatformRegis = () => {
                                 </svg>
                               </span>
                               <span className="text-gray-800">
-                                {renderIndustryWarning(formData?.industryType)}
+                                {renderIndustryWarning(formData?.industry_type)}
                               </span>
                             </li>
                           </ul>
@@ -843,8 +834,6 @@ const PlatformRegis = () => {
                               </li>
                             ))}
                           </ul>
-
-
                         </Row>
                       </div>
 
@@ -918,15 +907,14 @@ const PlatformRegis = () => {
             </div>
           </div>
         </section>
-
       </div>
 
       {/* Modal Success */}
       <Modal
         //title={<span className="text-2xl font-semibold flex justify-center pb-4">Success</span>}
         open={isSuccessModalVisible}
-        onOk={handleCloseSuccessModal}  // เมื่อกด "Got it" ปิด Modal และนำทางไปหน้าหลัก
-        onCancel={handleCloseSuccessModal}  // เมื่อกดปิด Modal
+        onOk={handleCloseSuccessModal}
+        onCancel={handleCloseSuccessModal}
         width={420}
         className="font-sans"
         footer={[
@@ -938,8 +926,8 @@ const PlatformRegis = () => {
             Got it
           </button>
         ]}
-        closable={false}  // ปิดไอคอนปิดที่มุมขวาบน
-        maskClosable={false} // ป้องกันการคลิกนอก Modal เพื่อปิด
+        closable={false}
+        maskClosable={false}
 
       >
         <div className="text-center pt-6">
@@ -961,8 +949,6 @@ const PlatformRegis = () => {
           </p>
         </div>
       </Modal>
-
-
     </>
   );
 }

@@ -1,6 +1,6 @@
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Download } from 'lucide-react';
 
 const data = [
