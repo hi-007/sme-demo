@@ -619,7 +619,7 @@ const PlatformTracking: React.FC = () => {
                                 <h4 >หมายเหตุ :</h4>
                               </div>
                               <div>
-                                <span>{company.review_comment}</span>
+                                <span className="font-sans ">{company.review_comment}</span>
                               </div>
                             </div>
                           </div>

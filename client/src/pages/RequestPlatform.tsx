@@ -24,6 +24,7 @@ interface Company {
   updated_at: string;
   size_category: string;
   business_type: string;
+  review_comment: string;
 }
 
 const RequestPlatform: React.FC = () => {
@@ -168,6 +169,55 @@ const RequestPlatform: React.FC = () => {
   //     setLoadings(false);
   //   }
   // };
+  const handleReceiveCase = async () => {
+    if (!selectedCompany) return;
+
+    try {
+      setLoadings(true);
+
+      // กำหนดสถานะใหม่เป็น "อยู่ระหว่างดำเนินการ"
+      const confirmStatus = "อยู่ระหว่างตรวจสอบ";
+
+      const { error } = await supabase
+        .from("companies")
+        .update({
+          status: confirmStatus,
+        })
+        .eq("id", selectedCompany.id);
+
+      if (error) throw error;
+
+      api.success({
+        message: "ข้อมูลอัปเดตสำเร็จ",
+        description: "สถานะของคำขอถูกอัปเดตเป็น 'อยู่ระหว่างดำเนินการ'",
+        placement: "topRight",
+        className: "font-sans text-gray-900",
+      });
+
+      // อัปเดตสถานะใน state
+      setSelectedCompany({ ...selectedCompany, status: confirmStatus });
+
+      // ปิด modal
+      // setIsConfirmModalOpen(false);
+      // setIsModalOpen(false);
+
+      // ดึงข้อมูลใหม่
+      fetchCompanies();
+    } catch (err) {
+      console.error(err);
+      api.error({
+        message: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถอัปเดตสถานะได้ กรุณาลองใหม่",
+        placement: "topRight",
+                className: "font-sans text-gray-900",
+
+      });
+    } finally {
+      setLoadings(false);
+    }
+  };
+
+
   const handleStatusUpdate = async () => {
     if (!selectedCompany) return;
 
@@ -889,6 +939,7 @@ const RequestPlatform: React.FC = () => {
                   )}
                 </Col>
                 <Col span={8}>
+
                   <Card className="w-full bg-white rounded-xl border-lg shadow-md">
                     <p className="text-lg font-medium text-gray-800 font-sans">ผลการพิจารณา</p>
                     <p className="text-md font-medium text-gray-600 font-sans pt-2">สถานปัจจุบัน : <Tag color="green" className="font-sans"> {selectedCompany?.status} </Tag></p>
@@ -903,46 +954,65 @@ const RequestPlatform: React.FC = () => {
                     </div>
 
                     <div className="pb-6">
-                      {/* <p className="text-md font-medium text-gray-800 font-sans">หมายเหตุการพิจารณา </p> */}
-                      {/* <TextArea
+                      <p className="text-md font-medium text-gray-800 font-sans">หมายเหตุการพิจารณา </p>
+                      <TextArea
                         rows={4}
-                        placeholder="กรุณากรอกเหตุผลในการพิจารณา"
-                        value={reviewComment}
-                        onChange={(e) => setReviewComment(e.target.value)}
-                      /> */}
+                        value={selectedCompany?.review_comment || '-'}
+                        readOnly
+                        disabled
+                      />
                     </div>
+
                     <Flex vertical gap="small" style={{ width: '100%' }} >
-                      <Button
-                        className="font-sans"
-                        size="large"
-                        color="default"
-                        variant="solid"
-                        loading={loadings}
-                        onClick={() => openConfirmationModal("อนุมัติคำขอ")}
-                      >
-                        อนุมัติ
-                      </Button>
 
-                      <Button
-                        color="danger"
-                        variant="outlined"
-                        className="font-sans"
-                        size="large"
-                        loading={loadings}
-                        onClick={() => openConfirmationModal("ปฏิเสธคำขอ")}
-                      >
-                        ปฏิเสธ
-                      </Button>
-                      <Button className="font-sans"
-                        color="primary"
-                        variant="dashed"
-                        size="large"
-                        loading={loadings}
-                        onClick={() => openConfirmationModal("แก้ไขคำขอ")}
-                      >
-                        ส่งกลับเพื่อแก้ไข
-                      </Button>
+                      {selectedCompany?.status === "รอตรวจสอบ" || selectedCompany?.status === "รอตรวจสอบ (มีการแก้ไข)" ? (
+                        <Button
+                          className="font-sans"
+                          size="large"
+                          color="primary"
+                          variant="solid"
+                          loading={loadings}
+                          onClick={() => {
+                            handleReceiveCase(); // ฟังก์ชันที่เปลี่ยนสถานะ
+                          }}
+                          disabled={loadings}
+                        >
+                          รับเรื่อง
+                        </Button>
+                      ) : (
+                        <>
+                          <Button
+                            className="font-sans"
+                            size="large"
+                            color="default"
+                            variant="solid"
+                            loading={loadings}
+                            onClick={() => openConfirmationModal("อนุมัติคำขอ")}
+                          >
+                            อนุมัติ
+                          </Button>
 
+                          <Button
+                            color="danger"
+                            variant="outlined"
+                            className="font-sans"
+                            size="large"
+                            loading={loadings}
+                            onClick={() => openConfirmationModal("ปฏิเสธคำขอ")}
+                          >
+                            ปฏิเสธ
+                          </Button>
+                          <Button className="font-sans"
+                            color="primary"
+                            variant="dashed"
+                            size="large"
+                            loading={loadings}
+                            onClick={() => openConfirmationModal("แก้ไขคำขอ")}
+                          >
+                            ส่งกลับเพื่อแก้ไข
+                          </Button>
+                        </>
+                      )}
                     </Flex>
                   </Card>
                 </Col>
