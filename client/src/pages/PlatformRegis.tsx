@@ -40,6 +40,7 @@ const renderIndustryWarning = (value: string) => {
   }
 }
 
+import type { SelectProps } from "antd";
 
 //----------------------------------------------------------------------------//
 
@@ -56,34 +57,23 @@ const PlatformRegis = () => {
   const [companyData, setCompanyData] = useState<any>(null);
 
 
-  // useEffect(() => {
-  //   if (companyId) {
-  //     setLoading(true);
-  //     const fetchCompanyData = async () => {
-  //       try {
-  //         const { data, error } = await supabase
-  //           .from("companies")
-  //           .select("*")
-  //           .eq("id", companyId)
-  //           .single();
+  //----------------------------------------------------------------------------//
 
-  //         if (error) {
-  //           throw error;
-  //         }
+  const { Option } = Select;
+  // state สำหรับ selectBefore / selectAfter
+  const [selectBefore, setSelectBefore] = useState("company");
+  const [selectAfter, setSelectAfter] = useState("ltd");
 
-  //         setCompanyData(data);
-  //         form.setFieldsValue(data);
-  //       } catch (err) {
-  //         console.error("Error fetching company data:", err);
-  //         message.error("ไม่สามารถดึงข้อมูลบริษัทได้");
-  //       } finally {
-  //         setLoading(false);
-  //       }
-  //     };
+  const handleBeforeChange: SelectProps["onChange"] = (value) => {
+    setSelectBefore(value as string);
+    form.setFieldsValue({ business_prefix: value });
+  };
 
-  //     fetchCompanyData();
-  //   }
-  // }, [companyId, form]);
+  const handleAfterChange: SelectProps["onChange"] = (value) => {
+    setSelectAfter(value as string);
+    form.setFieldsValue({ business_suffix: value });
+  };
+
 
   useEffect(() => {
     if (companyId && !companyData) { // Added check to ensure data isn't already set
@@ -100,8 +90,18 @@ const PlatformRegis = () => {
             throw error;
           }
 
-          setCompanyData(data);  // Set fetched data into state
-          form.setFieldsValue(data);  // Pre-fill form with fetched data
+          setCompanyData(data);
+          form.setFieldsValue(data);
+
+
+          // ✅ เซ็ตค่า selectBefore / selectAfter จาก DB
+          if (data.business_prefix) {
+            setSelectBefore(data.business_prefix);
+          }
+          if (data.business_suffix) {
+            setSelectAfter(data.business_suffix);
+          }
+
         } catch (err) {
           console.error("Error fetching company data:", err);
           message.error("ไม่สามารถดึงข้อมูลบริษัทได้");
@@ -249,35 +249,122 @@ const PlatformRegis = () => {
   //     setLoading(false) // ปิด Spinner
   //   }
   // }
+  // const [isDuplicate, setIsDuplicate] = useState(false); // State สำหรับการตรวจสอบเลขทะเบียนซ้ำ
+
+  const checkDuplicateBusinessRegNum = async (businessRegNum: string) => {
+    // ตรวจสอบว่าเลขทะเบียนซ้ำในฐานข้อมูลหรือไม่
+    const { data, error } = await supabase
+      .from('companies')
+      .select('business_reg_num')
+      .eq('business_reg_num', businessRegNum);
+
+    if (error) {
+      console.error("Error checking for duplicate:", error);
+      message.error("ไม่สามารถตรวจสอบข้อมูลได้");
+      return false;
+    }
+
+    if (data && data.length > 0) { // ถ้ามีข้อมูลซ้ำ
+      // setIsDuplicate(true);
+      message.error("เลขทะเบียนผู้ประกอบการ นี้มีอยู่แล้ว");
+      return false; // คืนค่า false หากซ้ำ
+    } else {
+      //setIsDuplicate(false);
+      return true; // คืนค่า true หากไม่มีซ้ำ
+    }
+  };
+
+  // const handleConfirm = async () => {
+  //   if (!formData || isDuplicate) {
+  //     message.error("กรุณาตรวจสอบเลขทะเบียนผู้ประกอบการ SME ก่อน");
+  //     return;
+  //   }
+
+  //   setLoading(true); 
+
+  //   try {
+  //     const { error } = companyId
+  //       ? await supabase.from("companies").update({
+  //         ...formData,
+  //         size_category: formData.size_category,
+  //         status: "รอตรวจสอบ (มีการแก้ไข)" // เปลี่ยนสถานะเมื่อแก้ไข
+  //       }).eq("id", companyId)
+  //       : await supabase.from("companies").insert([{
+  //         ...formData,
+  //         status: "รอตรวจสอบ",
+  //         business_type: "corporate"
+  //       }]);
+
+  //     if (error) throw error;
+
+  //     setIsModalVisible(false);
+  //     setIsSuccessModalVisible(true); // เปิด Modal Success
+  //   } catch (err) {
+  //     console.error("Error during submission:", err);
+  //     message.error("ไม่สามารถบันทึกข้อมูลได้");
+  //   } finally {
+  //     setLoading(false); // ปิด Spinner
+  //   }
+  // };
+
   const handleConfirm = async () => {
-    if (!formData) return;
-
-    setLoading(true); // เริ่มแสดง Spinner
-
     try {
-      const { error } = companyId
-        ? await supabase.from("companies").update({
-          ...formData,
-          size_category: formData.size_category,
+      const values = await form.validateFields(); // ดึงค่าทั้งหมดจากฟอร์ม
 
-          status: "รอตรวจสอบ (มีการแก้ไข)" // เปลี่ยนสถานะเมื่อแก้ไข
-        }).eq("id", companyId)
-        : await supabase.from("companies").insert([{
-          ...formData,
-          status: "รอตรวจสอบ"
-        }]);
+      const payload = {
+        ...values,
+        status: companyId ? "รอตรวจสอบ (มีการแก้ไข)" : "รอตรวจสอบ",
+        business_type: "corporate"
+      };
+
+      const { error } = companyId
+        ? await supabase.from("companies").update(payload).eq("id", companyId)
+        : await supabase.from("companies").insert([payload]);
 
       if (error) throw error;
 
       setIsModalVisible(false);
-      setIsSuccessModalVisible(true); // เปิด Modal Success
+      setIsSuccessModalVisible(true);
     } catch (err) {
       console.error("Error during submission:", err);
       message.error("ไม่สามารถบันทึกข้อมูลได้");
     } finally {
-      setLoading(false); // ปิด Spinner
+      setLoading(false);
     }
   };
+
+
+
+  // const handleConfirm = async () => {
+  //   if (!formData) return;
+
+  //   setLoading(true); // เริ่มแสดง Spinner
+
+  //   try {
+  //     const { error } = companyId
+  //       ? await supabase.from("companies").update({
+  //         ...formData,
+  //         size_category: formData.size_category,
+
+  //         status: "รอตรวจสอบ (มีการแก้ไข)" // เปลี่ยนสถานะเมื่อแก้ไข
+  //       }).eq("id", companyId)
+  //       : await supabase.from("companies").insert([{
+  //         ...formData,
+  //         status: "รอตรวจสอบ",
+  //         business_type: "corporate"
+  //       }]);
+
+  //     if (error) throw error;
+
+  //     setIsModalVisible(false);
+  //     setIsSuccessModalVisible(true); // เปิด Modal Success
+  //   } catch (err) {
+  //     console.error("Error during submission:", err);
+  //     message.error("ไม่สามารถบันทึกข้อมูลได้");
+  //   } finally {
+  //     setLoading(false); // ปิด Spinner
+  //   }
+  // };
 
   const handleCloseModal = () => setIsModalVisible(false)
 
@@ -373,11 +460,11 @@ const PlatformRegis = () => {
                       name="phone"
                       rules={[{ required: true, message: 'กรุณากรอกหมายเลขโทรศัพท์' }]}
                     >
-                      <Input />
+                      <Input maxLength={10} />
                     </Form.Item>
                     {/* ข้อมูลพื้นฐานของกิจการ */}
                     <Divider className="font-sans pt-4">หมวดที่ 1: ข้อมูลพื้นฐานของกิจการ</Divider>
-                    <Form.Item
+                    {/* <Form.Item
                       label="ประเภทธุรกิจ"
                       name="business_type"
                       rules={[{ required: true, message: 'กรุณาเลือกประเภทธุรกิจ' }]}
@@ -385,30 +472,136 @@ const PlatformRegis = () => {
                       <Radio.Group>
                         <Radio value="corporate">นิติบุคคล</Radio>
                         <Radio value="individual">บุคคลธรรมดา</Radio>
-                        {/* <Radio value="communityEnterprise">วิสาหกิจชุมชน</Radio> */}
                       </Radio.Group>
-                    </Form.Item>
+                    </Form.Item> */}
                     <Form.Item
+                      label="เลขทะเบียนผู้ประกอบการ"
+                      name="business_reg_num"
+                      rules={[
+                        {
+                          validator: async (_, value) => {
+                            if (!value) {
+                              return Promise.reject('กรุณากรอกเลขทะเบียนผู้ประกอบการ');
+                            }
+
+                            // ถ้าเป็นการแก้ไข และเลขเดิมเหมือนกับที่ DB → ข้ามการเช็คซ้ำ
+                            if (companyData && value === companyData.business_reg_num) {
+                              return Promise.resolve();
+                            }
+
+                            // ตรวจสอบซ้ำเฉพาะเลขใหม่
+                            const isValid = await checkDuplicateBusinessRegNum(value);
+                            if (!isValid) {
+                              return Promise.reject('เลขทะเบียนผู้ประกอบการ นี้มีอยู่แล้ว');
+                            }
+
+                            return Promise.resolve();
+                          }
+                        }
+                      ]}
+                    >
+                      <Input maxLength={13} />
+                    </Form.Item>
+
+                    {/* <Form.Item
                       label="เลขทะเบียนผู้ประกอบการ SME"
                       name="business_reg_num"
                       rules={[{ required: true, message: 'กรุณากรอกเลขทะเบียนผู้ประกอบการ SME' }]}
                     >
-                      <Input />
-                    </Form.Item>
+                      <Input 
+                      maxLength={13}
+                      />
+                    </Form.Item> */}
                     <Form.Item
-                      label="ชื่อผู้ประกอบการ SME"
+                      label="ชื่อผู้ประกอบการ"
                       name="owner_name"
-                      rules={[{ required: true, message: 'กรุณากรอกชื่อผู้ประกอบการ SME' }]}
+                      rules={[{ required: true, message: 'กรุณากรอกชื่อผู้ประกอบการ' }]}
                     >
                       <Input />
                     </Form.Item>
+
+
+                    {/* <Row gutter={[16, 16]}>
+                      <Col span={6}>
+                        <Form.Item
+                          label="คำนำหน้า"
+                          name="business_name"
+                          rules={[{ required: true, message: 'กรุณากรอกชื่อสถานประกอบการ SME' }]}
+                        >
+                          <Select
+                            //mode="multiple"
+                            size="large"
+                            placeholder="Please select"
+                            //defaultValue={['a10', 'c12']}
+                            //onChange={handleChange}
+                            style={{ width: '100%' }}
+                          //options={options}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={12}>
+                        <Form.Item
+                          label="ชื่อสถานประกอบการ"
+                          name="business_name"
+                          rules={[{ required: true, message: 'กรุณากรอกชื่อสถานประกอบการ SME' }]}
+                        >
+                          <Input />
+                        </Form.Item>
+                      </Col>
+                      <Col span={6}>
+                        <Form.Item
+                          label="คำลงท้าย"
+                          name="business_name"
+                          rules={[{ required: true, message: 'กรุณากรอกชื่อสถานประกอบการ SME' }]}
+                        >
+                          <Input />
+                        </Form.Item>
+                      </Col>
+                    </Row> */}
+
+
                     <Form.Item
-                      label="ชื่อสถานประกอบการ SME"
+                      label="ชื่อสถานประกอบการ"
                       name="business_name"
-                      rules={[{ required: true, message: 'กรุณากรอกชื่อสถานประกอบการ SME' }]}
+                      rules={[{ required: true, message: "กรุณากรอกชื่อสถานประกอบการ" }]}
                     >
-                      <Input />
+                      <Input
+                        className="w-full"
+                        addonBefore={
+                          <Select
+                            value={selectBefore}
+                            onChange={handleBeforeChange}
+                            className="w-44"
+                          >
+                            <Option value="company">บริษัท</Option>
+                            <Option value="ordinary-partnership">ห้างหุ้นส่วนสามัญนิติบุคคล</Option>
+                            <Option value="limited-partnership">ห้างหุ้นส่วนจำกัด</Option>
+                            <Option value="association">สมาคม</Option>
+                            <Option value="foundation">มูลนิธิ</Option>
+                          </Select>
+                        }
+                        addonAfter={
+                          <Select
+                            value={selectAfter}
+                            onChange={handleAfterChange}
+                            className="w-40"
+                          >
+                            <Option value="ltd">จำกัด</Option>
+                            <Option value="public-ltd">จำกัด (มหาชน)</Option>
+                            <Option value="unspecified">-</Option>
+                          </Select>
+                        }
+                        placeholder="กรอกชื่อสถานประกอบการ"
+                      />
                     </Form.Item>
+
+                    <Form.Item name="business_prefix" noStyle>
+                      <Input type="hidden" />
+                    </Form.Item>
+                    <Form.Item name="business_suffix" noStyle>
+                      <Input type="hidden" />
+                    </Form.Item>
+
                     <Form.Item
                       label="เว็บไซต์"
                       name="website_name"
@@ -651,7 +844,7 @@ const PlatformRegis = () => {
                           </Col>
                           <Col span={12}>
                             <div className="flex items-center">
-                              <Text strong className="font-sans mr-2">เลขทะเบียนผู้ประกอบการ SME:</Text>
+                              <Text strong className="font-sans mr-2">เลขทะเบียนผู้ประกอบการ:</Text>
                               <p className="font-sans">
                                 {formData?.business_reg_num}
                               </p>
@@ -660,7 +853,7 @@ const PlatformRegis = () => {
 
                           <Col span={12}>
                             <div className="flex items-center">
-                              <Text strong className="font-sans mr-2">ชื่อผู้ประกอบการ SME:</Text>
+                              <Text strong className="font-sans mr-2">ชื่อผู้ประกอบการ:</Text>
                               <p className="font-sans">
                                 {formData?.owner_name}
                               </p>
@@ -668,7 +861,7 @@ const PlatformRegis = () => {
                           </Col>
                           <Col span={12}>
                             <div className="flex items-center">
-                              <Text strong className="font-sans mr-2">ชื่อสถานประกอบการ SME:</Text>
+                              <Text strong className="font-sans mr-2">ชื่อสถานประกอบการ:</Text>
                               <p className="font-sans">
                                 {formData?.business_name}
                               </p>

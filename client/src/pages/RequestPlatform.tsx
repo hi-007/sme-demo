@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Timeline, Drawer, Flex, Tag, Card, Table, Spin, message, Dropdown, Menu, Modal, Row, Col, Form, Input, Radio, InputNumber, Select, Checkbox, Divider, Button } from "antd";
+import { DatePicker, Timeline, Drawer, Flex, Tag, Card, Table, Spin, message, Dropdown, Menu, Modal, Row, Col, Form, Input, Radio, InputNumber, Select, Checkbox, Divider, Button } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { supabase } from "../supabaseClient";
 import { MoreVertical } from "lucide-react";
+
+import type { SelectProps } from "antd";
+
+
+//import { TablePaginationConfig } from 'antd';
 
 // import { AlertTriangle, CheckCircle2, BarChart3, MoreVertical } from "lucide-react";
 const { TextArea } = Input;
@@ -10,7 +15,6 @@ import { DownloadOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { notification } from "antd";
 import { EarningsCard } from '../components/EarningsCard';
 import { StatsGrid } from '../components/StatsGrid';
-
 
 
 interface Company {
@@ -27,8 +31,11 @@ interface Company {
   review_comment: string;
 }
 
+const { RangePicker } = DatePicker;
+
 const RequestPlatform: React.FC = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
+
   const [loading, setLoading] = useState(false);
   // -------------------------------------//
 
@@ -45,12 +52,24 @@ const RequestPlatform: React.FC = () => {
   const [confirmStatus, setConfirmStatus] = useState(""); // The selected status for confirmation
   const [loadings, setLoadings] = useState(false); // Loading state for the buttons
 
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10, // ขนาดเริ่มต้นของแต่ละหน้า
+  });
+  const [total, setTotal] = useState<number | undefined>(undefined); // กำหนดให้เป็น undefined แทน null
+
+
 
   // ฟังก์ชัน handle เมนูที่คลิก
   const handleMenuClick = ({ key }: { key: string }, record: any) => {
     if (key === "view") {
       setSelectedCompany(record); // กำหนดข้อมูลที่เลือก
       form.setFieldsValue(record);
+
+      // ✅ เซ็ตค่า selectBefore / selectAfter
+      setSelectBefore(record.business_prefix || "");
+      setSelectAfter(record.business_suffix || "");
+
       setIsModalOpen(true); // เปิด modal เมื่อคลิก "ดูข้อมูล"
     } else if (key === "edit") {
       setIsDrawerOpen(true); // เปิด drawer
@@ -59,13 +78,6 @@ const RequestPlatform: React.FC = () => {
     }
   };
 
-  // const ActionMenu = () => (
-  //   <Menu className="font-sans" onClick={handleMenuClick}>
-  //     <Menu.Item key="view">ดูข้อมูล</Menu.Item>
-  //     <Menu.Item key="edit">ประวัติการแก้ไข</Menu.Item>
-  //     <Menu.Item key="delete">ลบข้อมูล</Menu.Item>
-  //   </Menu>
-  // );
 
   // Dropdown Menu สำหรับเลือกเมนู
   const ActionMenu = ({ record }: { record: any }) => (
@@ -85,21 +97,109 @@ const RequestPlatform: React.FC = () => {
   };
   // -------------------------------------//
 
+  const [showInput, setShowInput] = useState(false);
+  const [showDrawer, setShowDrawer] = useState(false);
+
+
+  const handleClickInput = () => {
+    setShowInput((prev) => !prev); // toggle แสดง/ซ่อน Input
+    setShowDrawer(false);          // ปิด Drawer ถ้าเปิดอยู่
+  };
+
+  const handleClickDrawer = () => {
+    setShowDrawer(true);
+    setShowInput(false);           // ซ่อน Input ถ้ามี
+  };
+
+  const handleDrawerClose = () => {
+    setShowDrawer(false);
+  };
+  // -------------------------------------//
+
+
+
+  const { Option } = Select;
+  // state สำหรับ selectBefore / selectAfter
+  const [selectBefore, setSelectBefore] = useState("");
+  const [selectAfter, setSelectAfter] = useState("");
+
+  const handleBeforeChange: SelectProps["onChange"] = (value) => {
+    setSelectBefore(value as string);
+    form.setFieldsValue({ business_prefix: value });
+  };
+
+  const handleAfterChange: SelectProps["onChange"] = (value) => {
+    setSelectAfter(value as string);
+    form.setFieldsValue({ business_suffix: value });
+  };
+
+  // -------------------------------------//
+
+
   // ✅ ใช้ notification hook
   const [api, contextHolder] = notification.useNotification();
 
 
+
   // Fetch companies from Supabase
+  // const fetchCompanies = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const { data, error } = await supabase
+  //       .from("companies")
+  //       .select("*")
+  //       .order("created_at", { ascending: false });
+
+  //     if (error) throw error;
+  //     setCompanies(data);
+  //   } catch (err) {
+  //     message.error("Failed to load data");
+  //     console.error("Fetch error:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+  // Fetch companies from Supabase
+  // const fetchCompanies = async () => {
+  //   setLoading(true);
+  //   const { current, pageSize } = pagination;
+
+  //   try {
+  //     const { data, error, count } = await supabase
+  //       .from("companies")
+  //       .select("*", { count: "exact" }) // ใช้ count: "exact" เพื่อรับจำนวนทั้งหมด
+  //       .order("created_at", { ascending: false })
+  //       .range((current - 1) * pageSize, current * pageSize - 1); // จัดการ range ตามหน้าและขนาดของหน้า
+
+  //     if (error) throw error;
+  //     setCompanies(data); // Set the data to state
+  //     setTotal(count ?? undefined); // ใช้ undefined แทน null ถ้า count เป็น null
+  //   } catch (err) {
+  //     message.error("Failed to load data");
+  //     console.error("Fetch error:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]); // กรองข้อมูล
+
+
+  // ฟังก์ชันค้นหาข้อมูลทั้งหมด
   const fetchCompanies = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error, count } = await supabase
         .from("companies")
-        .select("*")
+        .select("*", { count: "exact" })
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setCompanies(data); // Set the data to state
+      setCompanies(data); // Set the full data
+      setFilteredCompanies(data); // Set filtered data as the full data initially
+      setTotal(count ?? 0); // Set total count
     } catch (err) {
       message.error("Failed to load data");
       console.error("Fetch error:", err);
@@ -107,75 +207,99 @@ const RequestPlatform: React.FC = () => {
       setLoading(false);
     }
   };
+  // -------------------------------------//
+
+  const handleClear = () => {
+    form.resetFields();  // รีเซ็ตฟอร์ม
+    setFilteredCompanies(companies); // รีเซ็ตการกรองข้อมูล
+    setTotal(companies.length); // รีเซ็ตจำนวนทั้งหมด
+    setPagination({ current: 1, pageSize: pagination.pageSize }); // รีเซ็ตหน้าเป็นหน้าแรก
+
+  };
+  // -------------------------------------//
+
+  // ฟังก์ชันกรองข้อมูล
+  const handleSearch = (values: any) => {
+    const { keyword, sizeCategory, Status, dateRange } = values;
+
+    // กรองข้อมูลจากข้อมูลทั้งหมด
+    const filteredData = companies.filter((company) => {
+      const matchesKeyword =
+        keyword ? company.business_name.includes(keyword) || company.business_reg_num.includes(keyword) : true;
+      const matchesSizeCategory =
+        sizeCategory && sizeCategory !== "all" ? company.size_category === sizeCategory : true;
+      const matchesStatus =
+        Status && Status !== "all" ? company.status === Status : true;
+
+      // การกรองวันที่
+      let matchesDateRange = true;
+      if (dateRange && dateRange.length === 2) {
+        const startDate = new Date(dateRange[0]);
+        const endDate = new Date(dateRange[1]);
+
+        matchesDateRange =
+          new Date(company.created_at) >= startDate && new Date(company.created_at) <= endDate;
+      } else if (dateRange && dateRange.length === 1) {
+        // กรณีที่กรอกวันเดียว ให้ใช้วันนั้นทั้งวันเริ่มต้นและสิ้นสุด
+        const selectedDate = new Date(dateRange[0]);
+        matchesDateRange =
+          new Date(company.created_at).toDateString() === selectedDate.toDateString(); // เปรียบเทียบวันเดียว
+      }
+
+      return matchesKeyword && matchesSizeCategory && matchesStatus && matchesDateRange;
+    });
+    setFilteredCompanies(filteredData); // อัพเดตข้อมูลที่กรอง
+    setTotal(filteredData.length); // อัพเดตจำนวนทั้งหมดที่กรอง
+  };
+  // -------------------------------------//
+
+  const [filteredCompanies, setFilteredCompanies] = useState(companies); // ข้อมูลที่กรองแล้ว
+
+  const [keyword, setKeyword] = useState(""); // เก็บค่าคำค้นหา
+
+
+  // ฟังก์ชันสำหรับการค้นหาตามคำที่กรอก
+  const handleSearchkeyword = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setKeyword(value); // เก็บค่าคำค้นหาใน state
+
+    setLoading(true);
+    // กรองข้อมูลตามคำค้นหา
+    const filteredData = companies.filter(
+      (item) =>
+        item.business_name.toLowerCase().includes(value.toLowerCase()) || // ค้นหาจากชื่อธุรกิจ
+        item.business_reg_num.includes(value) // ค้นหาจากเลขทะเบียน
+    );
+    setFilteredCompanies(filteredData); // เซตข้อมูลที่กรองแล้ว
+    setTotal(filteredData.length); // อัพเดตจำนวนทั้งหมดที่กรอง
+
+    setLoading(false);
+  };
+  // -------------------------------------//
 
   // useEffect(() => {
-  //   const fetchCompanies = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const { data, error } = await supabase
-  //         .from("companies")
-  //         .select("*")
-  //         .order("created_at", { ascending: false });
-  //       if (error) throw error;
-  //       //setCompanies(data as Company[]);
-  //       setCompanies(data);
-  //     } catch (err: any) {
-  //       console.error("Fetch error:", err);
-  //       message.error("โหลดข้อมูลไม่สำเร็จ");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
   //   fetchCompanies();
   // }, []);
 
 
   useEffect(() => {
-    fetchCompanies(); // เรียกใช้ฟังก์ชันดึงข้อมูลบริษัทเมื่อคอมโพเนนต์เริ่มต้น
-  }, []);
-
+    fetchCompanies(); // เรียกใช้ฟังก์ชันดึงข้อมูลบริษัทเมื่อคอมโพเนนต์เริ่มต้นหรือ pagination เปลี่ยนแปลง
+  }, [pagination]);
+  // -------------------------------------//
 
   const openConfirmationModal = (status: string) => {
     setConfirmStatus(status); // ตั้งค่าตัวแปรสถานะที่จะเลือก
     setIsConfirmModalOpen(true); // เปิด Modal ยืนยัน
   };
+  // -------------------------------------//
 
-  // const handleStatusUpdate = async () => {
-  //   if (!selectedCompany) return;
-
-  //   try {
-  //     setLoadings(true);
-
-  //     const { error } = await supabase
-  //       .from("companies")
-  //       .update({
-  //         status: confirmStatus,
-  //         review_comment: reviewComment,
-  //       })
-  //       .eq("id", selectedCompany.id);
-
-  //     if (error) throw new Error(error.message);
-
-  //     setSelectedCompany({ ...selectedCompany, status: confirmStatus });
-  //     setIsConfirmModalOpen(false);
-  //     setIsModalOpen(false);
-  //     fetchCompanies();
-
-
-  //   } catch (err) {
-  //     message.error("ไม่สามารถอัปเดตสถานะได้");
-  //     console.error(err);
-  //   } finally {
-  //     setLoadings(false);
-  //   }
-  // };
   const handleReceiveCase = async () => {
     if (!selectedCompany) return;
 
     try {
       setLoadings(true);
 
-      // กำหนดสถานะใหม่เป็น "อยู่ระหว่างดำเนินการ"
+      // กำหนดสถานะใหม่เป็น "อยู่ระหว่างตรวจสอบ"
       const confirmStatus = "อยู่ระหว่างตรวจสอบ";
 
       const { error } = await supabase
@@ -189,7 +313,7 @@ const RequestPlatform: React.FC = () => {
 
       api.success({
         message: "ข้อมูลอัปเดตสำเร็จ",
-        description: "สถานะของคำขอถูกอัปเดตเป็น 'อยู่ระหว่างดำเนินการ'",
+        description: "สถานะของคำขอถูกอัปเดตเป็น 'อยู่ระหว่างตรวจสอบ'",
         placement: "topRight",
         className: "font-sans text-gray-900",
       });
@@ -209,13 +333,14 @@ const RequestPlatform: React.FC = () => {
         message: "เกิดข้อผิดพลาด",
         description: "ไม่สามารถอัปเดตสถานะได้ กรุณาลองใหม่",
         placement: "topRight",
-                className: "font-sans text-gray-900",
+        className: "font-sans text-gray-900",
 
       });
     } finally {
       setLoadings(false);
     }
   };
+  // -------------------------------------//
 
 
   const handleStatusUpdate = async () => {
@@ -257,62 +382,37 @@ const RequestPlatform: React.FC = () => {
       setLoadings(false);
     }
   };
+  // -------------------------------------//
 
 
-  // const handleStatusUpdate = async () => {
-  //   if (!selectedCompany) return;
-
-  //   try {
-  //     setLoadings(true);
-
-  //     const { error } = await supabase
-  //       .from("companies")
-  //       .update({
-  //         status: confirmStatus, // อัปเดตสถานะ
-  //         review_comment: reviewComment, // เพิ่มความคิดเห็นการพิจารณา
-  //       })
-  //       .eq("id", selectedCompany.id);
-
-  //     if (error) throw new Error(error.message);
-
-  //     // อัปเดตสถานะใน UI
-  //     setSelectedCompany({ ...selectedCompany, status: confirmStatus });
-
-  //     //message.success(`สถานะถูกอัปเดตเป็น: ${confirmStatus}`);
-  //     setIsConfirmModalOpen(false); // ปิด Modal ยืนยัน
-  //     setIsModalOpen(false); // ปิด Modal ข้อมูล
-  //     fetchCompanies(); // รีเฟรชข้อมูลในตารางหลังจากอัปเดตสถานะ
-
-  //     // Show success alert
-  //   } catch (err) {
-  //     message.error("ไม่สามารถอัปเดตสถานะได้");
-  //     console.error(err);
-  //   } finally {
-  //     setLoadings(false);
-  //   }
-  // };
-
-  // เมื่อคลิกแถวในตาราง
-  // const handleRowClick = (record: Company) => {
-  //   setSelectedCompany(record); // กำหนดข้อมูลที่เลือก
-  //   form.setFieldsValue(record); // กำหนดค่าฟอร์มให้ตรงกับข้อมูลที่เลือก
-  //   setIsModalOpen(true); // เปิด Modal
-  // };
-
-
-  // const handleRowClick = (record: any) => {
-  //   setSelectedCompany(record); // กำหนดข้อมูลที่เลือก
-  //   form.setFieldsValue(record); // กำหนดค่าฟอร์มให้ตรงกับข้อมูลที่เลือก
-  //   setIsModalOpen(true); // เปิด Modal
-  // };
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-  });
-
-  const handleTableChange = (pagination: any) => {
-    setPagination(pagination); // เก็บข้อมูล pagination
+  // Mapping prefix value → ข้อความไทย
+  const BUSINESS_PREFIX_LABEL: Record<string, string> = {
+    company: "บริษัท",
+    "public-company": "บริษัท (มหาชน)",
+    "ordinary-partnership": "ห้างหุ้นส่วนสามัญนิติบุคคล",
+    "limited-partnership": "ห้างหุ้นส่วนจำกัด",
+    association: "สมาคม",
+    foundation: "มูลนิธิ",
   };
+
+  // Mapping suffix value → ข้อความไทย
+  const BUSINESS_SUFFIX_LABEL: Record<string, string> = {
+    ltd: "จำกัด",
+    "public-ltd": "จำกัด (มหาชน)",
+    unspecified: "",
+  };
+
+  // Helper function รวมชื่อเต็ม
+  const getFullBusinessName = (record: any) => {
+    const prefix = BUSINESS_PREFIX_LABEL[record.business_prefix] || "";
+    const name = record.business_name || "";
+    const suffix = BUSINESS_SUFFIX_LABEL[record.business_suffix] || "";
+
+    return `${prefix ? prefix + " " : ""}${name}${suffix ? " " + suffix : ""}`;
+  };
+
+  // -------------------------------------//
+
 
   const columns: ColumnsType<Company> = [
     {
@@ -320,13 +420,12 @@ const RequestPlatform: React.FC = () => {
       key: "index",
       align: "center",
       render: (_: any, __: any, index: number) => {
-        // คำนวณเลข index ตามหน้า
-        const currentPage = pagination?.current || 1;
-        const pageSize = pagination?.pageSize || 10;
-        return (currentPage - 1) * pageSize + index + 1; // รันเลขจากหน้าแรก
+        // คำนวณลำดับจาก filteredCompanies และ pagination
+        const currentPage = pagination?.current ?? 1;
+        const pageSize = pagination?.pageSize ?? 5;
+        return (currentPage - 1) * pageSize + index + 1;
       },
-      width: 60,
-
+      width: 70,
     },
     {
       title: "เลขทะเบียนผู้ประกอบการ",
@@ -340,6 +439,7 @@ const RequestPlatform: React.FC = () => {
       dataIndex: "business_name",
       key: "business_name",
       width: "220px",
+      render: (_: any, record: any) => getFullBusinessName(record),
     },
     {
       title: "ขนาดกิจการ",
@@ -459,59 +559,7 @@ const RequestPlatform: React.FC = () => {
         </Dropdown>
       ),
     },
-    //     {
-    //   title: "",
-    //   key: "action",
-    //   width: "80px",
-    //   align: "center",
-    //     render: (_: any, record: any) => (
-    //       <Dropdown overlay={<ActionMenu record={record} />} trigger={["click"]}>
-    //       <button className="p-2 hover:bg-gray-100 rounded-full">
-    //         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-    //           <path
-    //             fill="#a6a5a5"
-    //             fillRule="evenodd"
-    //             d="M6.51 12a1.5 1.5 0 0 0-1.5-1.5H5A1.5 1.5 0 0 0 3.5 12v.01a1.5 1.5 0 0 0 1.5 1.5h.01a1.5 1.5 0 0 0 1.5-1.5zm5.5-1.5a1.5 1.5 0 0 1 1.5 1.5v.01a1.5 1.5 0 0 1-1.5 1.5H12a1.5 1.5 0 0 1-1.5-1.5V12a1.5 1.5 0 0 1 1.5-1.5zm7 0a1.5 1.5 0 0 1 1.5 1.5v.01a1.5 1.5 0 0 1-1.5 1.5H19a1.5 1.5 0 0 1-1.5-1.5V12a1.5 1.5 0 0 1 1.5-1.5z"
-    //             clipRule="evenodd"
-    //           />
-    //         </svg>
-    //       </button>
-    //     </Dropdown>
-    //   ),
-    // },
-    // {
-    //   title: "",
-    //   key: "action",
-    //   render: (text: any, record: any) => (
-    //     <Button onClick={() => handleRowClick(record)}>ดูข้อมูล</Button>
-    //   ),
-    // },
-    // {
-    //   title: "",
-    //   key: "action",
-    //   width: "80px",
-    //   align: "center",
-    //   render: () => (
-    //     <Dropdown overlay={<ActionMenu />} trigger={["click"]}>
-    //       <button className="p-2 hover:bg-gray-100 rounded-full">
-    //         {/* ไอคอน 3 จุด */}
-    //         <svg
-    //           xmlns="http://www.w3.org/2000/svg"
-    //           width="20"
-    //           height="20"
-    //           viewBox="0 0 24 24"
-    //         >
-    //           <path
-    //             fill="#a6a5a5"
-    //             fillRule="evenodd"
-    //             d="M6.51 12a1.5 1.5 0 0 0-1.5-1.5H5A1.5 1.5 0 0 0 3.5 12v.01a1.5 1.5 0 0 0 1.5 1.5h.01a1.5 1.5 0 0 0 1.5-1.5zm5.5-1.5a1.5 1.5 0 0 1 1.5 1.5v.01a1.5 1.5 0 0 1-1.5 1.5H12a1.5 1.5 0 0 1-1.5-1.5V12a1.5 1.5 0 0 1 1.5-1.5zm7 0a1.5 1.5 0 0 1 1.5 1.5v.01a1.5 1.5 0 0 1-1.5 1.5H19a1.5 1.5 0 0 1-1.5-1.5V12a1.5 1.5 0 0 1 1.5-1.5z"
-    //             clipRule="evenodd"
-    //           />
-    //         </svg>
-    //       </button>
-    //     </Dropdown>
-    //   ),
-    // },
+
   ];
 
   return (
@@ -642,22 +690,211 @@ const RequestPlatform: React.FC = () => {
       </div> */}
 
       <Card className="w-full bg-white rounded-2xl border-none shadow-sm">
-        <h1 className="text-xl font-bold mb-4 font-sans ">คำขอใช้งานแพลตฟอร์ม</h1>
 
+        <div className="flex justify-between ">
+          <div className="">
+            <h1 className="text-xl font-bold mb-4 font-sans ">คำขอใช้งานแพลตฟอร์ม</h1>
+          </div>
+          <div className="flex items-center gap-2">
+
+            {/* แสดง Input ถ้า showInput = true */}
+            {showInput && (
+              <Input
+                placeholder="Search here..."
+                value={keyword} // ใช้ค่า keyword ที่กรอก
+                onChange={handleSearchkeyword} // เรียกฟังก์ชันค้นหาทุกครั้งที่มีการพิมพ์
+                // style={{ marginBottom: "10px", width: "300px" }} // จัดแต่งเพิ่มเติม
+                variant="underlined"
+              />
+            )}
+
+
+            {/* ปุ่ม Input */}
+            <button
+              className="p-2 hover:bg-gray-100 rounded-full"
+              onClick={handleClickInput}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1"
+                  d="m21 21l-4.343-4.343m0 0A8 8 0 1 0 5.343 5.343a8 8 0 0 0 11.314 11.314"
+                />
+              </svg>
+            </button>
+
+
+            {/* ปุ่ม Drawer */}
+            <button
+              className="p-2 hover:bg-gray-100 rounded-full"
+              onClick={handleClickDrawer}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1"
+                  d="M4 6h16M7 12h10m-6 6h2"
+                />
+              </svg>
+            </button>
+
+
+            {/* Drawer */}
+
+
+            <Drawer
+              title={
+                <div className="font-sans">
+                  ตัวกรอกค้นหา
+                </div>
+              } placement="right"      // drawer เปิดจากขวา
+              onClose={handleDrawerClose}
+              open={showDrawer}
+              width={500}
+
+            >
+              <Form layout="vertical" size="large" onFinish={handleSearch} form={form}>
+                <Form.Item label="คำค้นหา" name="keyword">
+                  <Input />
+                </Form.Item>
+                {/* <Form.Item label="เลขทะเบียนผู้ประกอบการ" name="businessRegNum">
+                  <Input />
+                </Form.Item> */}
+                <Form.Item label="ขนาดกิจการ" name="sizeCategory">
+                  <Select>
+                    {/* ตัวเลือกขนาดกิจการ รวม "ทั้งหมด" */}
+                    <Select.Option value="all" className="font-sans">ทั้งหมด</Select.Option>
+                    <Select.Option value="micro" className="font-sans">วิสาหกิจรายย่อย</Select.Option>
+                    <Select.Option value="small" className="font-sans">วิสาหกิจขนาดย่อม</Select.Option>
+                    <Select.Option value="medium" className="font-sans">วิสาหกิจขนาดกลาง</Select.Option>
+                    <Select.Option value="notEligible" className="font-sans">ไม่เข้าเกณฑ์วิสาหกิจขนาดกลางและขนาดย่อม</Select.Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item label="สถานะ" name="Status">
+                  <Select>
+                    {/* ตัวเลือกขนาดกิจการ รวม "ทั้งหมด" */}
+                    <Select.Option value="all" className="font-sans">ทั้งหมด</Select.Option>
+                    <Select.Option value="รอตรวจสอบ" className="font-sans">รอตรวจสอบ</Select.Option>
+                    <Select.Option value="อยู่ระหว่างตรวจสอบ" className="font-sans">อยู่ระหว่างตรวจสอบ</Select.Option>
+                    <Select.Option value="อนุมัติคำขอ" className="font-sans">อนุมัติคำขอ</Select.Option>
+                    <Select.Option value="ปฏิเสธคำขอ" className="font-sans">ปฏิเสธคำขอ</Select.Option>
+                    <Select.Option value="รอตรวจสอบ (มีการแก้ไข)" className="font-sans">รอตรวจสอบ (มีการแก้ไข)</Select.Option>
+                    <Select.Option value="แก้ไขคำขอ" className="font-sans">แก้ไขคำขอ</Select.Option>
+
+                  </Select>
+                </Form.Item>
+                <Form.Item label="วันที่ยื่นคำขอ" name="dateRange">
+                  <RangePicker
+                    className="w-full"
+                    placeholder={["วันที่เริ่มต้น", "วันที่สิ้นสุด"]} // กำหนด placeholder สำหรับทั้ง 2 ช่อง
+                  />
+                </Form.Item>
+
+                <div className="flex justify-end">
+                  <Button type="dashed" size="large" className="mr-2 font-sans" onClick={handleClear}>
+                    ล้างค่า
+                  </Button>
+                  <Button type="primary" size="large" htmlType="submit" className="font-sans">
+                    ค้นหา
+                  </Button>
+                </div>
+              </Form>
+
+            </Drawer>
+
+
+          </div>
+
+        </div>
         {loading ? (
           <div className="flex justify-center items-center min-h-[200px]">
             <Spin size="large" />
           </div>
         ) : (
-          <div className="">
+          <div className="font-sans">
+
             <Table
               rowKey="id"
               columns={columns}
-              dataSource={companies}
-              pagination={{ pageSize: 5 }}
-              onChange={handleTableChange} // ใช้ handleTableChange ในการอัพเดทหน้า
+              dataSource={filteredCompanies} // ใช้ข้อมูลที่กรอง
+              scroll={{ x: 'max-content', y: 55 * 7 }}
 
+              pagination={{
+                className: 'pt-4',
+                total,
+                pageSize: pagination.pageSize ?? 10,
+                current: pagination.current ?? 1,
+                showTotal: (total, range) => (
+                  <span className="font-sans">
+                    {`${range[0]}-${range[1]} จาก ${total} รายการ`}
+                  </span>
+                ), showSizeChanger: true,
+                onChange: (page, pageSize) => {
+                  setPagination({ current: page, pageSize });
+                  // กรองข้อมูลใหม่ตามหน้า
+                  setFilteredCompanies(filteredCompanies.slice((page - 1) * pageSize, page * pageSize));
+                },
+              }}
             />
+
+            {/* <Table
+              rowKey="id"
+              columns={columns}
+              dataSource={filteredCompanies}
+              scroll={{ x: 'max-content', y: 55 * 7 }}
+              pagination={{
+                total,
+                pageSize: pagination.pageSize ?? 10,
+                current: pagination.current ?? 1,
+                showTotal: (total, range) => (
+                  <span className="font-sans">
+                    {`${range[0]}-${range[1]} จาก ${total} รายการ`}
+                  </span>
+                ), showSizeChanger: true,
+                onChange: (page, pageSize) => {
+                  setPagination({ current: page, pageSize });
+                  // กรองข้อมูลใหม่ตามหน้า
+                  setFilteredCompanies(companies.slice((page - 1) * pageSize, page * pageSize));
+                },
+              }}
+            /> */}
+
+            {/* <Table
+              rowKey="id"
+              columns={columns}
+              dataSource={companies}
+              scroll={{ x: 'max-content', y: 55 * 7 }}
+              pagination={{
+                className: 'pt-4',
+                total: total,
+                pageSize: pagination.pageSize ?? 10,
+                current: pagination.current ?? 1,  // ใช้ค่าดีฟอลต์ 1 หากเป็น undefined
+                showTotal: (total, range) => (
+                  <span className="font-sans">
+                    {`${range[0]}-${range[1]} จาก ${total} รายการ`}
+                  </span>
+                ),
+                showSizeChanger: true,
+                onChange: handleTableChange,
+              }}
+            /> */}
+
           </div>
 
         )}
@@ -736,28 +973,75 @@ const RequestPlatform: React.FC = () => {
                         </Form.Item>
 
                         <Form.Item
-                          label="เลขทะเบียนผู้ประกอบการ SME"
+                          label="เลขทะเบียนผู้ประกอบการ"
                           name="business_reg_num"
-                          rules={[{ required: true, message: "กรุณากรอกเลขทะเบียนผู้ประกอบการ SME" }]}
+                          rules={[{ required: true, message: "กรุณากรอกเลขทะเบียนผู้ประกอบการ" }]}
                         >
                           <Input readOnly />
                         </Form.Item>
 
                         <Form.Item
-                          label="ชื่อผู้ประกอบการ SME"
+                          label="ชื่อผู้ประกอบการ"
                           name="owner_name"
-                          rules={[{ required: true, message: "กรุณากรอกชื่อผู้ประกอบการ SME" }]}
+                          rules={[{ required: true, message: "กรุณากรอกชื่อผู้ประกอบการ" }]}
                         >
                           <Input readOnly />
                         </Form.Item>
 
-                        <Form.Item
-                          label="ชื่อสถานประกอบการ SME"
+                        {/* <Form.Item
+                          label="ชื่อสถานประกอบการ"
                           name="business_name"
-                          rules={[{ required: true, message: "กรุณากรอกชื่อสถานประกอบการ SME" }]}
+                          rules={[{ required: true, message: "กรุณากรอกชื่อสถานประกอบการ" }]}
                         >
-                          <Input />
+                          <Input readOnly/>
+                        </Form.Item> */}
+
+
+                        <Form.Item
+                          label="ชื่อสถานประกอบการ"
+                          name="business_name"
+                          rules={[{ required: true, message: "กรุณากรอกชื่อสถานประกอบการ" }]}
+                        >
+                          <Input
+                            readOnly
+                            className="w-full"
+                            addonBefore={
+                              <Select
+                                disabled
+                                value={selectBefore}
+                                onChange={handleBeforeChange}
+                                className="w-44"
+                              >
+                                <Option value="company">บริษัท</Option>
+                                <Option value="ordinary-partnership">ห้างหุ้นส่วนสามัญนิติบุคคล</Option>
+                                <Option value="limited-partnership">ห้างหุ้นส่วนจำกัด</Option>
+                                <Option value="association">สมาคม</Option>
+                                <Option value="foundation">มูลนิธิ</Option>
+                              </Select>
+                            }
+                            addonAfter={
+                              <Select
+                                disabled
+                                value={selectAfter}
+                                onChange={handleAfterChange}
+                                className="w-40"
+                              >
+                                <Option value="ltd">จำกัด</Option>
+                                <Option value="public-ltd">จำกัด (มหาชน)</Option>
+                                <Option value="unspecified">-</Option>
+                              </Select>
+                            }
+                            placeholder="กรอกชื่อสถานประกอบการ"
+                          />
                         </Form.Item>
+
+                        <Form.Item name="business_prefix" noStyle>
+                          <Input type="hidden" />
+                        </Form.Item>
+                        <Form.Item name="business_suffix" noStyle>
+                          <Input type="hidden" />
+                        </Form.Item>
+
 
                         <Form.Item
                           label="เว็บไซต์"

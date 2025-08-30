@@ -381,7 +381,7 @@ const PlatformTracking: React.FC = () => {
                                   </Col>
                                   <Col span={12}>
                                     <div className="flex items-center">
-                                      <Text strong className="font-sans mr-2">เลขทะเบียนผู้ประกอบการ SME:</Text>
+                                      <Text strong className="font-sans mr-2">เลขทะเบียนผู้ประกอบการ:</Text>
                                       <p className="font-sans">
                                         <span>{company.business_reg_num}</span>
                                       </p>
@@ -389,7 +389,7 @@ const PlatformTracking: React.FC = () => {
                                   </Col>
                                   <Col span={12}>
                                     <div className="flex items-center">
-                                      <Text strong className="font-sans mr-2">ชื่อผู้ประกอบการ SME:</Text>
+                                      <Text strong className="font-sans mr-2">ชื่อผู้ประกอบการ:</Text>
                                       <p className="font-sans">
                                         <span>{company.owner_name}</span>
                                       </p>
@@ -398,7 +398,7 @@ const PlatformTracking: React.FC = () => {
                                   </Col>
                                   <Col span={12}>
                                     <div className="flex items-center">
-                                      <Text strong className="font-sans mr-2">ชื่อสถานประกอบการ SME:</Text>
+                                      <Text strong className="font-sans mr-2">ชื่อสถานประกอบการ:</Text>
                                       <p className="font-sans">
                                         <span>{company.business_name}</span>
                                       </p>

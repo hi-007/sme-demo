@@ -296,9 +296,9 @@ const PlatformRegis: React.FC = () => {
                                             </Radio.Group>
                                         </Form.Item>
                                         <Form.Item
-                                            label="เลขทะเบียนผู้ประกอบการ SME"
+                                            label="เลขทะเบียนผู้ประกอบการ"
                                             name="businessRegNum"
-                                            rules={[{ required: true, message: 'กรุณากรอกเลขทะเบียนผู้ประกอบการ SME' }]}
+                                            rules={[{ required: true, message: 'กรุณากรอกเลขทะเบียนผู้ประกอบการ' }]}
                                         >
                                             <Input />
                                         </Form.Item>
@@ -310,9 +310,9 @@ const PlatformRegis: React.FC = () => {
                                             <Input />
                                         </Form.Item>
                                         <Form.Item
-                                            label="ชื่อสถานประกอบการ SME"
+                                            label="ชื่อสถานประกอบการ"
                                             name="businessName"
-                                            rules={[{ required: true, message: 'กรุณากรอกชื่อสถานประกอบการ SME' }]}
+                                            rules={[{ required: true, message: 'กรุณากรอกชื่อสถานประกอบการ' }]}
                                         >
                                             <Input />
                                         </Form.Item>
@@ -567,7 +567,7 @@ const PlatformRegis: React.FC = () => {
                                                     </Col>
                                                     <Col span={12}>
                                                         <div className="flex items-center">
-                                                            <Text strong className="font-sans mr-2">เลขทะเบียนผู้ประกอบการ SME:</Text>
+                                                            <Text strong className="font-sans mr-2">เลขทะเบียนผู้ประกอบการ:</Text>
                                                             <p className="font-sans">
                                                                 {formData?.businessRegNum}                              </p>
                                                         </div>
@@ -585,7 +585,7 @@ const PlatformRegis: React.FC = () => {
                                                     </Col>
                                                     <Col span={12}>
                                                         <div className="flex items-center">
-                                                            <Text strong className="font-sans mr-2">ชื่อสถานประกอบการ SME:</Text>
+                                                            <Text strong className="font-sans mr-2">ชื่อสถานประกอบการ:</Text>
                                                             <p className="font-sans">
                                                                 {formData?.businessName}
                                                             </p>
