@@ -1,10 +1,7 @@
-// src/components/CompanyRegistration.tsx
 import { useEffect, useState } from "react";
 import { Form, Input, Radio, InputNumber, Select, Checkbox, Divider, Button, Modal, Row, Col, Typography, message } from 'antd'
 import { supabase } from '../supabaseClient'
 import { useNavigate } from 'react-router-dom'
-//import { Upload } from "lucide-react";
-
 import { useLocation } from "react-router-dom";
 import { UploadOutlined } from '@ant-design/icons';
 
@@ -60,7 +57,6 @@ const PlatformRegis = () => {
   //----------------------------------------------------------------------------//
 
   const { Option } = Select;
-  // state สำหรับ selectBefore / selectAfter
   const [selectBefore, setSelectBefore] = useState("company");
   const [selectAfter, setSelectAfter] = useState("ltd");
 
@@ -76,8 +72,7 @@ const PlatformRegis = () => {
 
 
   useEffect(() => {
-    if (companyId && !companyData) { // Added check to ensure data isn't already set
-      setLoading(true);
+    if (companyId && !companyData) {
       const fetchCompanyData = async () => {
         try {
           const { data, error } = await supabase
@@ -93,8 +88,6 @@ const PlatformRegis = () => {
           setCompanyData(data);
           form.setFieldsValue(data);
 
-
-          // ✅ เซ็ตค่า selectBefore / selectAfter จาก DB
           if (data.business_prefix) {
             setSelectBefore(data.business_prefix);
           }
@@ -112,10 +105,8 @@ const PlatformRegis = () => {
 
       fetchCompanyData();
     }
-  }, [companyId, form, companyData]);  // Adding companyData as a dependency to avoid redundant fetches
+  }, [companyId, form, companyData]);
 
-
-  // ฟังก์ชัน formatter สำหรับแปลงค่าแสดงผลในรูปแบบเงิน
   const onChange: InputNumberProps['onChange'] = (value) => {
     console.log('changed', value);
   };
@@ -132,7 +123,7 @@ const PlatformRegis = () => {
   const businessSector = Form.useWatch("business_sector", form);
   const employees = Form.useWatch("employees", form);
   const revenue = Form.useWatch("revenue", form);
-  const selectedSize = Form.useWatch("size_category", form); // ✅ ดูค่า sizeCategory แบบ reactive
+  const selectedSize = Form.useWatch("size_category", form);
 
   // ฟังก์ชันคำนวณขนาดกิจการ
   const calculateSize = (
@@ -179,7 +170,6 @@ const PlatformRegis = () => {
 
   // อัปเดต sizeCategory อัตโนมัติ
   useEffect(() => {
-    // ถ้ายังไม่กรอกครบ 3 ช่อง ไม่ต้องเซ็ตค่า
     if (!businessSector || !employees || !revenue) {
       form.setFieldsValue({ size_category: undefined });
       return;
@@ -197,59 +187,11 @@ const PlatformRegis = () => {
   const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false)
 
   const handleSubmit = (values: any) => {
-    // เพิ่ม sizeCategory ลงใน formData เผื่อ Modal ใช้งาน
-    //const size = calculateSize(values.businessSector, values.employees, values.revenue);
-    // setFormData({ ...values, size_category: size });
     setFormData(values);
     setIsModalVisible(true);
   };
 
-  const [loading, setLoading] = useState(false) // ✅ เพิ่ม state loading
-
-  // const handleConfirm = async () => {
-  //   if (!formData) return
-
-  //   setLoading(true) // เริ่มแสดง Spinner
-  //   try {
-
-  //     const { error } = await supabase
-  //       .from('companies')
-  //       .insert([
-  //         {
-  //           email: formData.email,
-  //           phone: formData.phone,
-  //           business_type: formData.business_type,
-  //           business_reg_num: formData.business_reg_num,
-  //           owner_name: formData.owner_name,
-  //           business_name: formData.business_name,
-  //           website_name: formData.website_name,
-  //           business_sector: formData.business_sector,
-  //           employees: formData.employees,
-  //           revenue: formData.revenue,
-  //           size_category: formData.size_category,
-  //           industry_type: formData.industry_type,
-  //           dataWithRisk: formData.dataWithRisk,
-  //           occasionalProcessing: formData.occasionalProcessing,
-  //           section26Processing: formData.section26Processing,
-  //           participations: formData.participations,
-  //           status: "รอตรวจสอบ",
-  //         },
-  //       ])
-
-
-  //     if (error) {
-  //       console.error('Insert error:', error)
-  //       message.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล')
-  //       return
-  //     }
-
-  //     setIsModalVisible(false)
-  //     setIsSuccessModalVisible(true)
-  //   } finally {
-  //     setLoading(false) // ปิด Spinner
-  //   }
-  // }
-  // const [isDuplicate, setIsDuplicate] = useState(false); // State สำหรับการตรวจสอบเลขทะเบียนซ้ำ
+  const [loading, setLoading] = useState(false)
 
   const checkDuplicateBusinessRegNum = async (businessRegNum: string) => {
     // ตรวจสอบว่าเลขทะเบียนซ้ำในฐานข้อมูลหรือไม่
@@ -264,48 +206,13 @@ const PlatformRegis = () => {
       return false;
     }
 
-    if (data && data.length > 0) { // ถ้ามีข้อมูลซ้ำ
-      // setIsDuplicate(true);
+    if (data && data.length > 0) {
       message.error("เลขทะเบียนผู้ประกอบการ นี้มีอยู่แล้ว");
       return false; // คืนค่า false หากซ้ำ
     } else {
-      //setIsDuplicate(false);
       return true; // คืนค่า true หากไม่มีซ้ำ
     }
   };
-
-  // const handleConfirm = async () => {
-  //   if (!formData || isDuplicate) {
-  //     message.error("กรุณาตรวจสอบเลขทะเบียนผู้ประกอบการ SME ก่อน");
-  //     return;
-  //   }
-
-  //   setLoading(true); 
-
-  //   try {
-  //     const { error } = companyId
-  //       ? await supabase.from("companies").update({
-  //         ...formData,
-  //         size_category: formData.size_category,
-  //         status: "รอตรวจสอบ (มีการแก้ไข)" // เปลี่ยนสถานะเมื่อแก้ไข
-  //       }).eq("id", companyId)
-  //       : await supabase.from("companies").insert([{
-  //         ...formData,
-  //         status: "รอตรวจสอบ",
-  //         business_type: "corporate"
-  //       }]);
-
-  //     if (error) throw error;
-
-  //     setIsModalVisible(false);
-  //     setIsSuccessModalVisible(true); // เปิด Modal Success
-  //   } catch (err) {
-  //     console.error("Error during submission:", err);
-  //     message.error("ไม่สามารถบันทึกข้อมูลได้");
-  //   } finally {
-  //     setLoading(false); // ปิด Spinner
-  //   }
-  // };
 
   const handleConfirm = async () => {
     try {
@@ -333,39 +240,6 @@ const PlatformRegis = () => {
     }
   };
 
-
-
-  // const handleConfirm = async () => {
-  //   if (!formData) return;
-
-  //   setLoading(true); // เริ่มแสดง Spinner
-
-  //   try {
-  //     const { error } = companyId
-  //       ? await supabase.from("companies").update({
-  //         ...formData,
-  //         size_category: formData.size_category,
-
-  //         status: "รอตรวจสอบ (มีการแก้ไข)" // เปลี่ยนสถานะเมื่อแก้ไข
-  //       }).eq("id", companyId)
-  //       : await supabase.from("companies").insert([{
-  //         ...formData,
-  //         status: "รอตรวจสอบ",
-  //         business_type: "corporate"
-  //       }]);
-
-  //     if (error) throw error;
-
-  //     setIsModalVisible(false);
-  //     setIsSuccessModalVisible(true); // เปิด Modal Success
-  //   } catch (err) {
-  //     console.error("Error during submission:", err);
-  //     message.error("ไม่สามารถบันทึกข้อมูลได้");
-  //   } finally {
-  //     setLoading(false); // ปิด Spinner
-  //   }
-  // };
-
   const handleCloseModal = () => setIsModalVisible(false)
 
   const handleCloseSuccessModal = () => {
@@ -374,10 +248,6 @@ const PlatformRegis = () => {
     navigate('/')
   }
 
-
-  //----------------------------------------------------------------------------//
-  // Finding the label based on the selected value in sizeCategory
-  //const selectedSizeLabel = sizeOptions.find(option => option.value === formData?.sizeCategory)?.label;
 
   //----------------------------------------------------------------------------//
   const getSelectedOptions = () => {
@@ -389,20 +259,6 @@ const PlatformRegis = () => {
     };
     return selectedValues.map(value => options[value]);
   };
-
-  // const getSelectedOptions = () => {
-  //   const selectedValues: ('pdpa_platform' | 'target_support' | 'training_mooc')[] = form.getFieldValue('participations');
-  //   const options = {
-  //     pdpa_platform: 'การใช้งานแพลตฟอร์มรองรับกฎหมาย PDPA สำหรับหน่วยงานภาคเอกชน',
-  //     target_support: 'การเข้าร่วมเป็นหน่วยงานเป้าหมายและรับการสนับสนุนเพื่อปฏิบัติตามกฎหมายคุ้มครองข้อมูลส่วนบุคคล',
-  //     training_mooc: 'การฝึกอบรมหลักสูตรความรู้เกี่ยวกับกฎหมายคุมครองข้อมูลส่วนบุคคลสำหรับผู้ปฏิบัติงานผ่านระบบการเรียนรู้ในรูปแบบออนไลนฯ',
-  //   };
-
-  //   return selectedValues?.map((value) => options[value]);
-  // };
-
-
-
   return (
     <>
       <div>
@@ -446,7 +302,6 @@ const PlatformRegis = () => {
                     className="space-y-4 font-sans"
                     size="large"
                   >
-                    {/* อีเมลและเบอร์มือถือ */}
                     <Divider className="font-sans text-lg ">ข้อมูลผู้ติดต่อ</Divider>
                     <Form.Item
                       label="อีเมลผู้ประสานงาน"
@@ -462,18 +317,8 @@ const PlatformRegis = () => {
                     >
                       <Input maxLength={10} />
                     </Form.Item>
-                    {/* ข้อมูลพื้นฐานของกิจการ */}
                     <Divider className="font-sans pt-4">หมวดที่ 1: ข้อมูลพื้นฐานของกิจการ</Divider>
-                    {/* <Form.Item
-                      label="ประเภทธุรกิจ"
-                      name="business_type"
-                      rules={[{ required: true, message: 'กรุณาเลือกประเภทธุรกิจ' }]}
-                    >
-                      <Radio.Group>
-                        <Radio value="corporate">นิติบุคคล</Radio>
-                        <Radio value="individual">บุคคลธรรมดา</Radio>
-                      </Radio.Group>
-                    </Form.Item> */}
+
                     <Form.Item
                       label="เลขทะเบียนผู้ประกอบการ"
                       name="business_reg_num"
@@ -483,13 +328,9 @@ const PlatformRegis = () => {
                             if (!value) {
                               return Promise.reject('กรุณากรอกเลขทะเบียนผู้ประกอบการ');
                             }
-
-                            // ถ้าเป็นการแก้ไข และเลขเดิมเหมือนกับที่ DB → ข้ามการเช็คซ้ำ
                             if (companyData && value === companyData.business_reg_num) {
                               return Promise.resolve();
                             }
-
-                            // ตรวจสอบซ้ำเฉพาะเลขใหม่
                             const isValid = await checkDuplicateBusinessRegNum(value);
                             if (!isValid) {
                               return Promise.reject('เลขทะเบียนผู้ประกอบการ นี้มีอยู่แล้ว');
@@ -503,15 +344,6 @@ const PlatformRegis = () => {
                       <Input maxLength={13} />
                     </Form.Item>
 
-                    {/* <Form.Item
-                      label="เลขทะเบียนผู้ประกอบการ SME"
-                      name="business_reg_num"
-                      rules={[{ required: true, message: 'กรุณากรอกเลขทะเบียนผู้ประกอบการ SME' }]}
-                    >
-                      <Input 
-                      maxLength={13}
-                      />
-                    </Form.Item> */}
                     <Form.Item
                       label="ชื่อผู้ประกอบการ"
                       name="owner_name"
@@ -519,46 +351,6 @@ const PlatformRegis = () => {
                     >
                       <Input />
                     </Form.Item>
-
-
-                    {/* <Row gutter={[16, 16]}>
-                      <Col span={6}>
-                        <Form.Item
-                          label="คำนำหน้า"
-                          name="business_name"
-                          rules={[{ required: true, message: 'กรุณากรอกชื่อสถานประกอบการ SME' }]}
-                        >
-                          <Select
-                            //mode="multiple"
-                            size="large"
-                            placeholder="Please select"
-                            //defaultValue={['a10', 'c12']}
-                            //onChange={handleChange}
-                            style={{ width: '100%' }}
-                          //options={options}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={12}>
-                        <Form.Item
-                          label="ชื่อสถานประกอบการ"
-                          name="business_name"
-                          rules={[{ required: true, message: 'กรุณากรอกชื่อสถานประกอบการ SME' }]}
-                        >
-                          <Input />
-                        </Form.Item>
-                      </Col>
-                      <Col span={6}>
-                        <Form.Item
-                          label="คำลงท้าย"
-                          name="business_name"
-                          rules={[{ required: true, message: 'กรุณากรอกชื่อสถานประกอบการ SME' }]}
-                        >
-                          <Input />
-                        </Form.Item>
-                      </Col>
-                    </Row> */}
-
 
                     <Form.Item
                       label="ชื่อสถานประกอบการ"
@@ -608,9 +400,7 @@ const PlatformRegis = () => {
                     >
                       <Input />
                     </Form.Item>
-                    {/* ขนาดกิจการ */}
                     <Divider className="font-sans pt-4">หมวดที่ 2: ประเมินขนาดกิจการ</Divider>
-                    {/* ภาคธุรกิจ */}
                     <Form.Item
                       label="ภาคธุรกิจ"
                       name="business_sector"
@@ -621,7 +411,6 @@ const PlatformRegis = () => {
                         <Radio value="trade_service">ภาคการค้า/การบริการ</Radio>
                       </Radio.Group>
                     </Form.Item>
-                    {/* จำนวนพนักงาน */}
                     <Form.Item
                       label="จำนวนพนักงาน"
                       name="employees"
@@ -629,7 +418,6 @@ const PlatformRegis = () => {
                     >
                       <InputNumber min={1} className="w-full" />
                     </Form.Item>
-                    {/* รายได้ */}
                     <Form.Item
                       label="รายได้ของกิจการ (บาท/ปี)"
                       name="revenue"
@@ -642,19 +430,12 @@ const PlatformRegis = () => {
                         onChange={onChange}
                       />
                     </Form.Item>
-                    {/* ขนาดกิจการ */}
                     <Form.Item
                       label="ขนาดกิจการ"
                       name="size_category"
                       rules={[{ required: true, message: "กรุณาเลือกขนาดกิจการ (ระบบคำนวณตามการจ้างงานและรายได้)" }]}
                     >
-                      {/* <Radio.Group className="flex flex-col space-y-2" value={selectedSize}>
-                        {sizeOptions.map((opt) => (
-                          <Radio key={opt.value} value={opt.value} disabled>
-                            {opt.label}
-                          </Radio>
-                        ))}
-                      </Radio.Group> */}
+
                       <Radio.Group className="flex flex-col space-y-2">
                         {sizeOptions.map((opt) => (
                           <Radio
@@ -669,7 +450,6 @@ const PlatformRegis = () => {
                       </Radio.Group>
                     </Form.Item>
 
-                    {/* ประเภทอุตสาหกรรม */}
                     <Divider className="font-sans pt-4">หมวดที่ 3: ประเภทอุตสาหกรรม</Divider>
                     <Form.Item label="ประเภทอุตสาหกรรม" name="industry_type" className="" rules={[{ required: true, message: "กรุณาเลือกประเภทอุตสาหกรรม" }]}>
                       <Select placeholder="เลือกประเภทอุตสาหกรรม">
@@ -779,7 +559,6 @@ const PlatformRegis = () => {
                         ดาวน์โหลดไฟล์
                       </Link>
                     </ul>
-                    {/* ปุ่ม Submit */}
 
                     <Form.Item className="flex justify-center gap-4">
                       <Button
@@ -793,7 +572,6 @@ const PlatformRegis = () => {
                     </Form.Item>
                   </Form>
 
-                  {/* Modal สำหรับแสดงรายละเอียด ก่อนบันทึก*/}
                   <Modal
                     title={<span className="text-2xl font-semibold flex justify-center pb-4">ตรวจสอบรายละเอียดการลงทะเบียน</span>}  // ใช้ Tailwind สำหรับการเพิ่มขนาดตัวอักษร
                     open={isModalVisible}
@@ -806,7 +584,6 @@ const PlatformRegis = () => {
                     className="font-sans"
                     style={{ top: 26 }}
                   >
-                    {/* ทำให้เนื้อหา scroll */}
                     <div className="overflow-y-auto overflow-x-hidden max-h-[82vh]">
                       <span className="flex justify-center mb-4 text-gray-500" >กรุณาตรวจสอบรายละเอียดการลงทะเบียนก่อนยืนยัน</span>
                       <div className="mb-4">
@@ -878,7 +655,6 @@ const PlatformRegis = () => {
                         </Row>
                       </div>
 
-                      {/* เพิ่มกลุ่มข้อมูลอื่น ๆ เช่น ข้อมูลการประเมินขนาดกิจการ */}
                       <div className="mb-4">
                         <Title level={4} className="font-sans bg-slate-100 p-2">ข้อมูลการประเมินขนาดกิจการ</Title>
 
@@ -988,7 +764,7 @@ const PlatformRegis = () => {
                           </Col>
                         </Row>
                       </div>
-                      {/* เพิ่มรายละเอียดหมวดที่ 3 */}
+
                       <Divider></Divider>
                       <div className="mb-4">
                         <Title level={4} className="font-sans">ประเภทอุตสาหกรรม</Title>
@@ -1011,9 +787,7 @@ const PlatformRegis = () => {
                       <div className="mb-4">
                         <Title level={4} className="font-sans">การดำเนินการที่ประสงค์เข้าร่วม</Title>
                         <Row gutter={[16, 16]} className="pl-6">
-
                           <ul className="space-y-3 text-sm font-sans">
-                            {/* แสดงข้อความจาก Checkbox ที่เลือก */}
                             {getSelectedOptions()?.map((option, index) => (
                               <li key={index} className="flex gap-x-3">
                                 <span className="size-5 flex justify-center items-center rounded-full bg-blue-50 text-blue-600">
@@ -1085,7 +859,7 @@ const PlatformRegis = () => {
                             key="ok"
                             type="primary"
                             onClick={handleConfirm}
-                            loading={loading} // ✅ แสดง Spinner บนปุ่ม
+                            loading={loading}
 
                             className="w-36 h-10 font-sans p-4 ml-2 bg-blue-500 text-white hover:bg-blue-600"
                           >
@@ -1102,9 +876,7 @@ const PlatformRegis = () => {
         </section>
       </div>
 
-      {/* Modal Success */}
       <Modal
-        //title={<span className="text-2xl font-semibold flex justify-center pb-4">Success</span>}
         open={isSuccessModalVisible}
         onOk={handleCloseSuccessModal}
         onCancel={handleCloseSuccessModal}

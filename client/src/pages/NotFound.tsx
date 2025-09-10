@@ -1,32 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from 'antd';
-
-import illustration from '../images/illustration.svg'; // Adjust the path as necessary
-
+import illustration from '../images/illustration.svg';
 
 const NotFound: React.FC = () => {
   const navigate = useNavigate();
 
   return (
     <>
-      {/* <div className="flex flex-col items-center justify-center min-h-screen bg-white text-center px-4">
-        <Result
-          status="404"
-          title="404"
-          subTitle="Sorry, the page you visited does not exist."
-          extra={<Button
-            type="primary"
-            size="large"
-            className="bg-[#2196f3]"
-            onClick={() => navigate("/")}
-          >
-            Go Back Home
-          </Button>}
-        />
-
-      </div> */}
-
       <section className="bg-white ">
         <div className="container min-h-screen px-6 py-12 mx-auto lg:flex lg:items-center lg:gap-12">
           <div className="wf-ull lg:w-1/2">
@@ -56,8 +37,6 @@ const NotFound: React.FC = () => {
                 </svg>
                 <span>Go Back Home</span>
               </Button>
-
-       
             </div>
           </div>
 
@@ -66,7 +45,6 @@ const NotFound: React.FC = () => {
               alt="Not Found Illustration"
               className="w-full max-w-lg lg:mx-auto"
             />
-
           </div>
         </div>
       </section>

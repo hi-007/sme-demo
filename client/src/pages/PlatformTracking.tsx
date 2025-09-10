@@ -42,18 +42,15 @@ const PlatformTracking: React.FC = () => {
     "3": "ไม่แน่ใจ",
   };
 
-  // ฟังก์ชันแปลงค่าที่เก็บใน DB เป็นข้อความภาษาไทย
   const mapParticipations = (values: string[] = []) => {
     const options: Record<string, string> = {
       pdpa_platform: 'การใช้งานแพลตฟอร์มรองรับกฎหมาย PDPA สำหรับหน่วยงานภาคเอกชน',
       target_support: 'การเข้าร่วมเป็นหน่วยงานเป้าหมายและรับการสนับสนุนเพื่อปฏิบัติตามกฎหมายคุ้มครองข้อมูลส่วนบุคคล',
       training_mooc: 'การฝึกอบรมหลักสูตรความรู้เกี่ยวกับกฎหมายคุมครองข้อมูลส่วนบุคคลสำหรับผู้ปฏิบัติงานผ่านระบบการเรียนรู้ในรูปแบบออนไลน์ MOOC',
     }
-
     return values.map(v => options[v]).filter(Boolean)
   }
 
-  // แปลงค่า industryType จาก DB เป็นข้อความภาษาไทย
   const mapIndustryType = (value: string) => {
     const options: Record<string, string> = {
       PublicSectorStability: 'ด้านความมั่นคงภาครัฐ',
@@ -80,8 +77,7 @@ const PlatformTracking: React.FC = () => {
         const { data, error } = await supabase
           .from("companies")
           .select("*")
-          .order("created_at", { ascending: false }) // ล่าสุดก่อน
-        // .limit(1)  // ลบออกเพื่อดึงทุก record
+          .order("created_at", { ascending: false })
 
         if (error) throw error
         if (data) setCompanies(data)
@@ -184,11 +180,9 @@ const PlatformTracking: React.FC = () => {
     }
   };
 
-
   // ------------------------------------------------------- //
 
   const handleEditClick = (companyId: string) => {
-    // Navigate to the form and pass the company data to pre-fill
     navigate(`/PlatformRegis`, {
       state: { companyId },
     });
@@ -259,45 +253,11 @@ const PlatformTracking: React.FC = () => {
             <div className="space-y-0">
               {companies.map((company) => (
 
-                // {loading ? (
-                //   <div className="flex justify-center items-center min-h-[300px]">
-                //     <Spin size="large" />
-                //   </div>
-                // ) : companies.length === 0 ? (
-                //   <p className="text-center text-gray-500">ยังไม่มีคำขอ</p>
-                // ) : (
-                //   <div className="space-y-0">
-                //     {companies.map((company) => (
-
                 <div className="container mx-auto px-4 lg:px-8 relative z-10">
                   <div className="max-w-4xl mx-auto">
                     <Row>
                       <Col span={24}>
                         <div key={company.id} className="bg-white/80 backdrop-blur-sm p-6 mb-12 rounded-2xl shadow-lg border border-gray-200/50 relative overflow-hidden">
-                          {/* <div className="flex justify-between items-start">
-                            <div>
-                              <span className="text-lg font-sans font-semibold text-gray-900">
-                                {company.business_name}
-                              </span>
-                            </div>
-                            <div className="space-y-2">
-                              <div className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium font-sans ${getStatusBadge(company.status).bg} ${getStatusBadge(company.status).text}`}>
-                                {getStatusBadge(company.status).icon}
-                                {company.status}
-                              </div>
-
-                              {company.status === "แก้ไขคำขอ" && (
-                                <div className="mt-4">
-                                  <Tooltip title="แก้ไขข้อมูล">
-                                    <Button type="dashed" shape="circle" icon={<EditOutlined />}
-                                      onClick={() => handleEditClick(company.id)}
-                                    />
-                                  </Tooltip>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                           */}
 
                           <div className="flex justify-between items-start">
                             <div>
@@ -305,8 +265,7 @@ const PlatformTracking: React.FC = () => {
                                 {company.business_name}
                               </span>
                             </div>
-                            <div className="flex items-center space-x-2"> {/* Use flex to align items in a row */}
-                              {/* The Edit Request Button */}
+                            <div className="flex items-center space-x-2">
                               {company.status === "แก้ไขคำขอ" && (
                                 <Tooltip title="แก้ไขข้อมูล">
                                   <Button
@@ -324,13 +283,10 @@ const PlatformTracking: React.FC = () => {
 
                             </div>
                           </div>
-
                           {/* ------------------------------------------- */}
-
                           <div className="space-y-4 mt-4">
                             <details
                               className="cursor-pointer  group border-s-4 border-gray-200 bg-gray-50 p-4 [&_summary::-webkit-details-marker]:hidden"
-                            //open
                             >
                               <summary className="flex items-center justify-between gap-1.5 text-gray-900">
                                 <h2 className="text-lg font-medium font-sans">ข้อมูลการลงทะเบียน</h2>
@@ -623,7 +579,6 @@ const PlatformTracking: React.FC = () => {
                               </div>
                             </div>
                           </div>
-                          {/* ----------------- Footer ------------------ */}
                           <div className="py-4">
                             <span className="text-md font-sans text-gray-600">
                               ส่งเมื่อ: {new Date(company.created_at).toLocaleString()}
@@ -647,15 +602,8 @@ const PlatformTracking: React.FC = () => {
             </div>
           )}
         </section>
-
-        {/* <section className="font-sans min-h-screen py-0 bg-gradient-to-br bg-white relative overflow-hidden">
-          
-        </section> */}
       </div>
-
     </div>
-
-
   );
 }
 

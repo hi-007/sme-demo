@@ -1,6 +1,3 @@
-//import React, { useState } from "react";
-//import { Button } from "antd";
-//import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
 import Navigation from "../components/Navigation";
 import ServicesSection from "../components/ServicesSection";
@@ -26,13 +23,11 @@ const LandingPage: React.FC = () => {
         <div id="contact">
           <ContactSection />
         </div>
-         <div id="faq">
+        <div id="faq">
           <FaqSection />
         </div>
         <Footer />
       </div>
-
-
     </>
   );
 };

@@ -8,13 +8,10 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen p-2 mt-[-42px] ">
       <div className="max-w-8xl mx-auto space-y-6">
-        {/* Header */}
         <div className="mb-4">
           <h1 className="text-3xl font-bold text-slate-800 mb-2">Analytics Dashboard</h1>
           <p className="text-slate-600">Monitor your business performance and key metrics</p>
         </div>
-
-        {/* Top Row - Sales Overview */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2">
             <SalesOverview />
@@ -74,8 +71,6 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-
-        {/* Bottom Row */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2">
             <ProjectStatus />

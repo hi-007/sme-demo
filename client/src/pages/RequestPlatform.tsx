@@ -6,16 +6,11 @@ import { MoreVertical } from "lucide-react";
 
 import type { SelectProps } from "antd";
 
-
-//import { TablePaginationConfig } from 'antd';
-
-// import { AlertTriangle, CheckCircle2, BarChart3, MoreVertical } from "lucide-react";
 const { TextArea } = Input;
 import { DownloadOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { notification } from "antd";
 import { EarningsCard } from '../components/EarningsCard';
 import { StatsGrid } from '../components/StatsGrid';
-
 
 interface Company {
   id: string;
@@ -39,47 +34,39 @@ const RequestPlatform: React.FC = () => {
   const [loading, setLoading] = useState(false);
   // -------------------------------------//
 
-  // -------------------------------------//
-
-  const [form] = Form.useForm(); // ใช้ form instance
+  const [form] = Form.useForm();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); // สำหรับแสดง modal ยืนยัน
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const [reviewComment, setReviewComment] = useState(""); // Review comment for the status update
-  const [confirmStatus, setConfirmStatus] = useState(""); // The selected status for confirmation
-  const [loadings, setLoadings] = useState(false); // Loading state for the buttons
-
+  const [reviewComment, setReviewComment] = useState("");
+  const [confirmStatus, setConfirmStatus] = useState("");
+  const [loadings, setLoadings] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10, // ขนาดเริ่มต้นของแต่ละหน้า
+    pageSize: 10,
   });
-  const [total, setTotal] = useState<number | undefined>(undefined); // กำหนดให้เป็น undefined แทน null
+  const [total, setTotal] = useState<number | undefined>(undefined);
 
 
-
-  // ฟังก์ชัน handle เมนูที่คลิก
   const handleMenuClick = ({ key }: { key: string }, record: any) => {
     if (key === "view") {
-      setSelectedCompany(record); // กำหนดข้อมูลที่เลือก
+      setSelectedCompany(record);
       form.setFieldsValue(record);
 
-      // ✅ เซ็ตค่า selectBefore / selectAfter
       setSelectBefore(record.business_prefix || "");
       setSelectAfter(record.business_suffix || "");
 
-      setIsModalOpen(true); // เปิด modal เมื่อคลิก "ดูข้อมูล"
+      setIsModalOpen(true);
     } else if (key === "edit") {
-      setIsDrawerOpen(true); // เปิด drawer
+      setIsDrawerOpen(true);
     } else if (key === "delete") {
       console.log("ลบข้อมูล");
     }
   };
 
-
-  // Dropdown Menu สำหรับเลือกเมนู
   const ActionMenu = ({ record }: { record: any }) => (
     <Menu className="font-sans" onClick={(e) => handleMenuClick(e, record)}>
       <Menu.Item key="view">ดูข้อมูล</Menu.Item>
@@ -87,7 +74,6 @@ const RequestPlatform: React.FC = () => {
       <Menu.Item key="delete" danger>ลบข้อมูล</Menu.Item>
     </Menu>
   );
-
 
   const sizeOptions: Record<string, string> = {
     "micro": "วิสาหกิจรายย่อย (Micro Enterprise)",
@@ -102,13 +88,13 @@ const RequestPlatform: React.FC = () => {
 
 
   const handleClickInput = () => {
-    setShowInput((prev) => !prev); // toggle แสดง/ซ่อน Input
-    setShowDrawer(false);          // ปิด Drawer ถ้าเปิดอยู่
+    setShowInput((prev) => !prev);
+    setShowDrawer(false);
   };
 
   const handleClickDrawer = () => {
     setShowDrawer(true);
-    setShowInput(false);           // ซ่อน Input ถ้ามี
+    setShowInput(false);
   };
 
   const handleDrawerClose = () => {
@@ -116,10 +102,7 @@ const RequestPlatform: React.FC = () => {
   };
   // -------------------------------------//
 
-
-
   const { Option } = Select;
-  // state สำหรับ selectBefore / selectAfter
   const [selectBefore, setSelectBefore] = useState("");
   const [selectAfter, setSelectAfter] = useState("");
 
@@ -135,56 +118,8 @@ const RequestPlatform: React.FC = () => {
 
   // -------------------------------------//
 
-
   // ✅ ใช้ notification hook
   const [api, contextHolder] = notification.useNotification();
-
-
-
-  // Fetch companies from Supabase
-  // const fetchCompanies = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const { data, error } = await supabase
-  //       .from("companies")
-  //       .select("*")
-  //       .order("created_at", { ascending: false });
-
-  //     if (error) throw error;
-  //     setCompanies(data);
-  //   } catch (err) {
-  //     message.error("Failed to load data");
-  //     console.error("Fetch error:", err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-
-  // Fetch companies from Supabase
-  // const fetchCompanies = async () => {
-  //   setLoading(true);
-  //   const { current, pageSize } = pagination;
-
-  //   try {
-  //     const { data, error, count } = await supabase
-  //       .from("companies")
-  //       .select("*", { count: "exact" }) // ใช้ count: "exact" เพื่อรับจำนวนทั้งหมด
-  //       .order("created_at", { ascending: false })
-  //       .range((current - 1) * pageSize, current * pageSize - 1); // จัดการ range ตามหน้าและขนาดของหน้า
-
-  //     if (error) throw error;
-  //     setCompanies(data); // Set the data to state
-  //     setTotal(count ?? undefined); // ใช้ undefined แทน null ถ้า count เป็น null
-  //   } catch (err) {
-  //     message.error("Failed to load data");
-  //     console.error("Fetch error:", err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]); // กรองข้อมูล
 
 
   // ฟังก์ชันค้นหาข้อมูลทั้งหมด
@@ -197,9 +132,9 @@ const RequestPlatform: React.FC = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setCompanies(data); // Set the full data
-      setFilteredCompanies(data); // Set filtered data as the full data initially
-      setTotal(count ?? 0); // Set total count
+      setCompanies(data);
+      setFilteredCompanies(data);
+      setTotal(count ?? 0);
     } catch (err) {
       message.error("Failed to load data");
       console.error("Fetch error:", err);
@@ -210,19 +145,17 @@ const RequestPlatform: React.FC = () => {
   // -------------------------------------//
 
   const handleClear = () => {
-    form.resetFields();  // รีเซ็ตฟอร์ม
-    setFilteredCompanies(companies); // รีเซ็ตการกรองข้อมูล
-    setTotal(companies.length); // รีเซ็ตจำนวนทั้งหมด
-    setPagination({ current: 1, pageSize: pagination.pageSize }); // รีเซ็ตหน้าเป็นหน้าแรก
+    form.resetFields();
+    setFilteredCompanies(companies);
+    setTotal(companies.length);
+    setPagination({ current: 1, pageSize: pagination.pageSize });
 
   };
   // -------------------------------------//
 
-  // ฟังก์ชันกรองข้อมูล
   const handleSearch = (values: any) => {
     const { keyword, sizeCategory, Status, dateRange } = values;
 
-    // กรองข้อมูลจากข้อมูลทั้งหมด
     const filteredData = companies.filter((company) => {
       const matchesKeyword =
         keyword ? company.business_name.includes(keyword) || company.business_reg_num.includes(keyword) : true;
@@ -231,7 +164,6 @@ const RequestPlatform: React.FC = () => {
       const matchesStatus =
         Status && Status !== "all" ? company.status === Status : true;
 
-      // การกรองวันที่
       let matchesDateRange = true;
       if (dateRange && dateRange.length === 2) {
         const startDate = new Date(dateRange[0]);
@@ -240,56 +172,48 @@ const RequestPlatform: React.FC = () => {
         matchesDateRange =
           new Date(company.created_at) >= startDate && new Date(company.created_at) <= endDate;
       } else if (dateRange && dateRange.length === 1) {
-        // กรณีที่กรอกวันเดียว ให้ใช้วันนั้นทั้งวันเริ่มต้นและสิ้นสุด
         const selectedDate = new Date(dateRange[0]);
         matchesDateRange =
-          new Date(company.created_at).toDateString() === selectedDate.toDateString(); // เปรียบเทียบวันเดียว
+          new Date(company.created_at).toDateString() === selectedDate.toDateString();
       }
 
       return matchesKeyword && matchesSizeCategory && matchesStatus && matchesDateRange;
     });
-    setFilteredCompanies(filteredData); // อัพเดตข้อมูลที่กรอง
-    setTotal(filteredData.length); // อัพเดตจำนวนทั้งหมดที่กรอง
+    setFilteredCompanies(filteredData);
+    setTotal(filteredData.length);
   };
+
   // -------------------------------------//
 
-  const [filteredCompanies, setFilteredCompanies] = useState(companies); // ข้อมูลที่กรองแล้ว
-
-  const [keyword, setKeyword] = useState(""); // เก็บค่าคำค้นหา
-
+  const [filteredCompanies, setFilteredCompanies] = useState(companies);
+  const [keyword, setKeyword] = useState("");
 
   // ฟังก์ชันสำหรับการค้นหาตามคำที่กรอก
   const handleSearchkeyword = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setKeyword(value); // เก็บค่าคำค้นหาใน state
-
+    setKeyword(value);
     setLoading(true);
-    // กรองข้อมูลตามคำค้นหา
+
     const filteredData = companies.filter(
       (item) =>
-        item.business_name.toLowerCase().includes(value.toLowerCase()) || // ค้นหาจากชื่อธุรกิจ
-        item.business_reg_num.includes(value) // ค้นหาจากเลขทะเบียน
+        item.business_name.toLowerCase().includes(value.toLowerCase()) ||
+        item.business_reg_num.includes(value)
     );
-    setFilteredCompanies(filteredData); // เซตข้อมูลที่กรองแล้ว
-    setTotal(filteredData.length); // อัพเดตจำนวนทั้งหมดที่กรอง
-
+    setFilteredCompanies(filteredData);
+    setTotal(filteredData.length);
     setLoading(false);
   };
   // -------------------------------------//
 
-  // useEffect(() => {
-  //   fetchCompanies();
-  // }, []);
-
 
   useEffect(() => {
-    fetchCompanies(); // เรียกใช้ฟังก์ชันดึงข้อมูลบริษัทเมื่อคอมโพเนนต์เริ่มต้นหรือ pagination เปลี่ยนแปลง
+    fetchCompanies();
   }, [pagination]);
   // -------------------------------------//
 
   const openConfirmationModal = (status: string) => {
-    setConfirmStatus(status); // ตั้งค่าตัวแปรสถานะที่จะเลือก
-    setIsConfirmModalOpen(true); // เปิด Modal ยืนยัน
+    setConfirmStatus(status);
+    setIsConfirmModalOpen(true);
   };
   // -------------------------------------//
 
@@ -298,8 +222,6 @@ const RequestPlatform: React.FC = () => {
 
     try {
       setLoadings(true);
-
-      // กำหนดสถานะใหม่เป็น "อยู่ระหว่างตรวจสอบ"
       const confirmStatus = "อยู่ระหว่างตรวจสอบ";
 
       const { error } = await supabase
@@ -318,14 +240,8 @@ const RequestPlatform: React.FC = () => {
         className: "font-sans text-gray-900",
       });
 
-      // อัปเดตสถานะใน state
       setSelectedCompany({ ...selectedCompany, status: confirmStatus });
 
-      // ปิด modal
-      // setIsConfirmModalOpen(false);
-      // setIsModalOpen(false);
-
-      // ดึงข้อมูลใหม่
       fetchCompanies();
     } catch (err) {
       console.error(err);
@@ -345,7 +261,6 @@ const RequestPlatform: React.FC = () => {
 
   const handleStatusUpdate = async () => {
     if (!selectedCompany) return;
-
     try {
       setLoadings(true);
 
@@ -363,8 +278,7 @@ const RequestPlatform: React.FC = () => {
         message: "ข้อมูลอัปเดตสำเร็จ",
         description: "สถานะของคำขอถูกอัปเดตเรียบร้อยแล้ว",
         placement: "topRight",
-        className: "font-sans text-gray-900", // Customize font here
-
+        className: "font-sans text-gray-900",
       });
 
       setSelectedCompany({ ...selectedCompany, status: confirmStatus });
@@ -382,10 +296,9 @@ const RequestPlatform: React.FC = () => {
       setLoadings(false);
     }
   };
+
   // -------------------------------------//
 
-
-  // Mapping prefix value → ข้อความไทย
   const BUSINESS_PREFIX_LABEL: Record<string, string> = {
     company: "บริษัท",
     "public-company": "บริษัท (มหาชน)",
@@ -402,7 +315,6 @@ const RequestPlatform: React.FC = () => {
     unspecified: "",
   };
 
-  // Helper function รวมชื่อเต็ม
   const getFullBusinessName = (record: any) => {
     const prefix = BUSINESS_PREFIX_LABEL[record.business_prefix] || "";
     const name = record.business_name || "";
@@ -413,14 +325,12 @@ const RequestPlatform: React.FC = () => {
 
   // -------------------------------------//
 
-
   const columns: ColumnsType<Company> = [
     {
       title: "ลำดับ",
       key: "index",
       align: "center",
       render: (_: any, __: any, index: number) => {
-        // คำนวณลำดับจาก filteredCompanies และ pagination
         const currentPage = pagination?.current ?? 1;
         const pageSize = pagination?.pageSize ?? 5;
         return (currentPage - 1) * pageSize + index + 1;
@@ -450,7 +360,7 @@ const RequestPlatform: React.FC = () => {
         return (
           <div className="py-1.5 px-3.5 bg-gray-50 rounded-full flex items-center justify-center w-max gap-1">
             <span className="font-light text-md text-gray-800">
-              {sizeOptions[value] || "-"}  {/* ✅ ใช้ mapping แทน string ตรงๆ */}
+              {sizeOptions[value] || "-"}
             </span>
           </div>
         );
@@ -461,7 +371,6 @@ const RequestPlatform: React.FC = () => {
       title: "สถานะ",
       dataIndex: "status",
       key: "status",
-      //align: "center",
       width: "180px",
       render: (status: string) => {
         switch (status) {
@@ -565,129 +474,16 @@ const RequestPlatform: React.FC = () => {
   return (
     <>
       {contextHolder}
-
-      {/* <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6"> */}
       <div className=" mx-auto space-y-6 mb-4">
-        {/* Header */}
-
-        {/* Dashboard Content */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          {/* Earnings Card */}
           <div className="lg:col-span-1">
             <EarningsCard />
           </div>
-
-          {/* Stats Grid */}
           <div className="lg:col-span-3 font-sans">
             <StatsGrid />
           </div>
         </div>
       </div>
-      {/* </div> */}
-
-      {/* <div className="pb-6">
-        <Row gutter={[16, 16]}>
-          <Col span={6}>
-            <Card className="w-full bg-white rounded-2xl border-none shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-lg font-medium text-gray-500 font-sans">คำขอทั้งหมด</p>
-                  <p className="text-3xl font-bold text-yellow-600">365</p>
-                </div>
-                <div className="p-3 bg-yellow-100 rounded-full">
-                  <BarChart3 className="h-6 w-6 text-yellow-600" />
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="flex items-center">
-                  <div className="w-full bg-yellow-200 rounded-full h-2">
-                    <div
-                      className="bg-yellow-500 h-2 rounded-full"
-                    // style={{ width: `${(riskMetrics.medium / totalRisks) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className="ml-2 text-xs text-muted-foreground">
-                  </span>
-                </div>
-              </div>
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card className="w-full bg-white rounded-2xl border-none shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-lg font-medium text-gray-500 font-sans">รอตรวจสอบ</p>
-                  <p className="text-3xl font-bold text-orange-500">79</p>
-                </div>
-                <div className="p-3 bg-orange-100 rounded-full">
-                  <AlertTriangle className="h-6 w-6 text-orange-500" />
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="flex items-center">
-                  <div className="w-full bg-orange-200 rounded-full h-2">
-                    <div
-                      className="bg-orange-500 h-2 rounded-full"
-                    ></div>
-                  </div>
-                  <span className="ml-2 text-xs text-muted-foreground">
-
-                  </span>
-                </div>
-              </div>
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card className="w-full bg-white rounded-2xl border-none shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-lg font-medium text-gray-500 font-sans">อยู่ระหว่างตรวจสอบ</p>
-                  <p className="text-3xl font-bold text-yellow-600">5</p>
-                </div>
-                <div className="p-3 bg-yellow-100 rounded-full">
-                  <BarChart3 className="h-6 w-6 text-yellow-600" />
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="flex items-center">
-                  <div className="w-full bg-yellow-200 rounded-full h-2">
-                    <div
-                      className="bg-yellow-500 h-2 rounded-full"
-                    ></div>
-                  </div>
-                  <span className="ml-2 text-xs text-muted-foreground">
-                  </span>
-                </div>
-              </div>
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card className="w-full bg-white rounded-2xl border-none shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="ttext-lg font-medium text-gray-500 font-sans">อนุมัติ</p>
-                  <p className="text-3xl font-bold text-green-500">35</p>
-                </div>
-                <div className="p-3 bg-green-100 rounded-full">
-                  <CheckCircle2 className="h-6 w-6 text-green-500" />
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="flex items-center">
-                  <div className="w-full bg-green-200 rounded-full h-2">
-                    <div
-                      className="bg-green-500 h-2 rounded-full"
-                    ></div>
-                  </div>
-                  <span className="ml-2 text-xs text-muted-foreground">
-
-                  </span>
-                </div>
-              </div>
-            </Card>
-          </Col>
-        </Row>
-      </div> */}
 
       <Card className="w-full bg-white rounded-2xl border-none shadow-sm">
 
@@ -697,19 +493,15 @@ const RequestPlatform: React.FC = () => {
           </div>
           <div className="flex items-center gap-2">
 
-            {/* แสดง Input ถ้า showInput = true */}
             {showInput && (
               <Input
                 placeholder="Search here..."
-                value={keyword} // ใช้ค่า keyword ที่กรอก
-                onChange={handleSearchkeyword} // เรียกฟังก์ชันค้นหาทุกครั้งที่มีการพิมพ์
-                // style={{ marginBottom: "10px", width: "300px" }} // จัดแต่งเพิ่มเติม
+                value={keyword}
+                onChange={handleSearchkeyword}
                 variant="underlined"
               />
             )}
 
-
-            {/* ปุ่ม Input */}
             <button
               className="p-2 hover:bg-gray-100 rounded-full"
               onClick={handleClickInput}
@@ -731,8 +523,6 @@ const RequestPlatform: React.FC = () => {
               </svg>
             </button>
 
-
-            {/* ปุ่ม Drawer */}
             <button
               className="p-2 hover:bg-gray-100 rounded-full"
               onClick={handleClickDrawer}
@@ -755,30 +545,22 @@ const RequestPlatform: React.FC = () => {
             </button>
 
 
-            {/* Drawer */}
-
-
             <Drawer
               title={
                 <div className="font-sans">
                   ตัวกรอกค้นหา
                 </div>
-              } placement="right"      // drawer เปิดจากขวา
+              } placement="right"
               onClose={handleDrawerClose}
               open={showDrawer}
               width={500}
-
             >
               <Form layout="vertical" size="large" onFinish={handleSearch} form={form}>
                 <Form.Item label="คำค้นหา" name="keyword">
                   <Input />
                 </Form.Item>
-                {/* <Form.Item label="เลขทะเบียนผู้ประกอบการ" name="businessRegNum">
-                  <Input />
-                </Form.Item> */}
                 <Form.Item label="ขนาดกิจการ" name="sizeCategory">
                   <Select>
-                    {/* ตัวเลือกขนาดกิจการ รวม "ทั้งหมด" */}
                     <Select.Option value="all" className="font-sans">ทั้งหมด</Select.Option>
                     <Select.Option value="micro" className="font-sans">วิสาหกิจรายย่อย</Select.Option>
                     <Select.Option value="small" className="font-sans">วิสาหกิจขนาดย่อม</Select.Option>
@@ -788,7 +570,6 @@ const RequestPlatform: React.FC = () => {
                 </Form.Item>
                 <Form.Item label="สถานะ" name="Status">
                   <Select>
-                    {/* ตัวเลือกขนาดกิจการ รวม "ทั้งหมด" */}
                     <Select.Option value="all" className="font-sans">ทั้งหมด</Select.Option>
                     <Select.Option value="รอตรวจสอบ" className="font-sans">รอตรวจสอบ</Select.Option>
                     <Select.Option value="อยู่ระหว่างตรวจสอบ" className="font-sans">อยู่ระหว่างตรวจสอบ</Select.Option>
@@ -802,10 +583,9 @@ const RequestPlatform: React.FC = () => {
                 <Form.Item label="วันที่ยื่นคำขอ" name="dateRange">
                   <RangePicker
                     className="w-full"
-                    placeholder={["วันที่เริ่มต้น", "วันที่สิ้นสุด"]} // กำหนด placeholder สำหรับทั้ง 2 ช่อง
+                    placeholder={["วันที่เริ่มต้น", "วันที่สิ้นสุด"]}
                   />
                 </Form.Item>
-
                 <div className="flex justify-end">
                   <Button type="dashed" size="large" className="mr-2 font-sans" onClick={handleClear}>
                     ล้างค่า
@@ -815,10 +595,7 @@ const RequestPlatform: React.FC = () => {
                   </Button>
                 </div>
               </Form>
-
             </Drawer>
-
-
           </div>
 
         </div>
@@ -832,9 +609,8 @@ const RequestPlatform: React.FC = () => {
             <Table
               rowKey="id"
               columns={columns}
-              dataSource={filteredCompanies} // ใช้ข้อมูลที่กรอง
+              dataSource={filteredCompanies}
               scroll={{ x: 'max-content', y: 55 * 7 }}
-
               pagination={{
                 className: 'pt-4',
                 total,
@@ -847,54 +623,10 @@ const RequestPlatform: React.FC = () => {
                 ), showSizeChanger: true,
                 onChange: (page, pageSize) => {
                   setPagination({ current: page, pageSize });
-                  // กรองข้อมูลใหม่ตามหน้า
                   setFilteredCompanies(filteredCompanies.slice((page - 1) * pageSize, page * pageSize));
                 },
               }}
             />
-
-            {/* <Table
-              rowKey="id"
-              columns={columns}
-              dataSource={filteredCompanies}
-              scroll={{ x: 'max-content', y: 55 * 7 }}
-              pagination={{
-                total,
-                pageSize: pagination.pageSize ?? 10,
-                current: pagination.current ?? 1,
-                showTotal: (total, range) => (
-                  <span className="font-sans">
-                    {`${range[0]}-${range[1]} จาก ${total} รายการ`}
-                  </span>
-                ), showSizeChanger: true,
-                onChange: (page, pageSize) => {
-                  setPagination({ current: page, pageSize });
-                  // กรองข้อมูลใหม่ตามหน้า
-                  setFilteredCompanies(companies.slice((page - 1) * pageSize, page * pageSize));
-                },
-              }}
-            /> */}
-
-            {/* <Table
-              rowKey="id"
-              columns={columns}
-              dataSource={companies}
-              scroll={{ x: 'max-content', y: 55 * 7 }}
-              pagination={{
-                className: 'pt-4',
-                total: total,
-                pageSize: pagination.pageSize ?? 10,
-                current: pagination.current ?? 1,  // ใช้ค่าดีฟอลต์ 1 หากเป็น undefined
-                showTotal: (total, range) => (
-                  <span className="font-sans">
-                    {`${range[0]}-${range[1]} จาก ${total} รายการ`}
-                  </span>
-                ),
-                showSizeChanger: true,
-                onChange: handleTableChange,
-              }}
-            /> */}
-
           </div>
 
         )}
@@ -907,12 +639,9 @@ const RequestPlatform: React.FC = () => {
         maskClosable={false}
         width="95%"
         className="!max-w-full"
-        style={{ top: 20, padding: 0 }} // Use style here for height
-
+        style={{ top: 20, padding: 0 }}
       >
-
         <div className="flex flex-col h-[90vh] bg-white font-sans overflow-hidden mt-2">
-          {/* Header */}
           <div className="flex justify-between items-center pb-4 px-0 border-b border-gray-200">
             <h4 className="font-bold text-gray-700 text-lg">พิจารณาคำขอลงทะเบียน : {selectedCompany?.business_name}</h4>
             <button
@@ -924,16 +653,13 @@ const RequestPlatform: React.FC = () => {
             </button>
           </div>
 
-          {/* Body */}
           <div className="p-4 overflow-y-auto flex-1">
             <p className="text-gray-700">
             </p>
-            <div className="flex justify-center items-center"> {/* จัดคอนเทนต์ให้อยู่กลาง Modal */}
-
+            <div className="flex justify-center items-center">
               <Row gutter={[24, 24]} >
                 <Col span={16}>
                   {selectedCompany ? (
-
                     <Card className="w-full bg-white rounded-xl border-lg shadow-md">
                       <Form
                         form={form}
@@ -941,7 +667,6 @@ const RequestPlatform: React.FC = () => {
                         onFinish={() => { }}
                         className="space-y-4 font-sans"
                         size="large"
-                      //disabled
                       >
                         <Divider className="font-sans text-lg">ข้อมูลผู้ติดต่อ</Divider>
                         <Form.Item
@@ -987,16 +712,6 @@ const RequestPlatform: React.FC = () => {
                         >
                           <Input readOnly />
                         </Form.Item>
-
-                        {/* <Form.Item
-                          label="ชื่อสถานประกอบการ"
-                          name="business_name"
-                          rules={[{ required: true, message: "กรุณากรอกชื่อสถานประกอบการ" }]}
-                        >
-                          <Input readOnly/>
-                        </Form.Item> */}
-
-
                         <Form.Item
                           label="ชื่อสถานประกอบการ"
                           name="business_name"
@@ -1041,8 +756,6 @@ const RequestPlatform: React.FC = () => {
                         <Form.Item name="business_suffix" noStyle>
                           <Input type="hidden" />
                         </Form.Item>
-
-
                         <Form.Item
                           label="เว็บไซต์"
                           name="website_name"
@@ -1051,7 +764,6 @@ const RequestPlatform: React.FC = () => {
                         </Form.Item>
                         <Divider className="font-sans pt-4">หมวดที่ 2: ขนาดกิจการ</Divider>
 
-                        {/* ภาคธุรกิจ */}
                         <Form.Item
                           label="ภาคธุรกิจ"
                           name="business_sector"
@@ -1063,7 +775,6 @@ const RequestPlatform: React.FC = () => {
                           </Radio.Group>
                         </Form.Item>
 
-                        {/* จำนวนพนักงาน */}
                         <Form.Item
                           label="จำนวนพนักงาน"
                           name="employees"
@@ -1072,19 +783,14 @@ const RequestPlatform: React.FC = () => {
                           <InputNumber min={1} className="w-full" readOnly />
                         </Form.Item>
 
-                        {/* รายได้ */}
-
                         <Form.Item
                           label="รายได้ของกิจการ (บาท/ปี)"
                           name="revenue"
                           rules={[{ required: true, message: "กรุณากรอกรายได้ของกิจการ" }]}
                         >
-
                           <InputNumber<number>
                             className="w-full"
-                            //formatter={formatter}
                             parser={(value) => value?.replace(/\$\s?|(,*)/g, '') as unknown as number}
-                            // onChange={onChange}
                             readOnly
                           />
                         </Form.Item>
@@ -1180,7 +886,6 @@ const RequestPlatform: React.FC = () => {
                           </Checkbox.Group>
                         </Form.Item>
 
-
                         <Divider className="font-sans pt-4">หมวดที่ 6: หลักฐานประกอบการพิจารณาคุณสมบัติ</Divider>
 
                         <ul className="list-disc ps-5 space-y-2 text-sm text-gray-600 py-4">
@@ -1257,7 +962,7 @@ const RequestPlatform: React.FC = () => {
                           variant="solid"
                           loading={loadings}
                           onClick={() => {
-                            handleReceiveCase(); // ฟังก์ชันที่เปลี่ยนสถานะ
+                            handleReceiveCase();
                           }}
                           disabled={loadings}
                         >
@@ -1303,25 +1008,10 @@ const RequestPlatform: React.FC = () => {
               </Row>
             </div>
           </div>
-
-          {/* Footer */}
-          {/* <div className="flex justify-end items-center gap-x-2 py-3 px-4 border-t border-gray-200">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="py-2 px-3 text-sm font-medium rounded-lg border border-gray-200 bg-white hover:bg-gray-50"
-            >
-              Close
-            </button>
-            <button className="py-2 px-3 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700">
-              Save changes
-            </button>
-          </div> */}
         </div>
       </Modal>
-      {/* Confirmation Modal */}
-      {/* Modal ยืนยันการอัปเดตสถานะ */}
+
       <Modal
-        // title="ยืนยันการอัปเดตสถานะ"
         title={
           <div className="flex items-center">
             <ExclamationCircleOutlined className="mr-2 text-yellow-600 text-2xl" />
@@ -1343,7 +1033,6 @@ const RequestPlatform: React.FC = () => {
         }
         className="font-sans"
       >
-        {/* <p>กรุณายืนยันการอัปเดตสถานะของคำขอ</p> */}
         <p className="my-2">สถานะที่จะอัปเดตเป็น: {confirmStatus}</p>
         <TextArea
           rows={4}
@@ -1359,7 +1048,7 @@ const RequestPlatform: React.FC = () => {
             ประวัติการแก้ไข
           </div>
         }
-        placement="right" // drawer ด้านขวา
+        placement="right"
         onClose={() => setIsDrawerOpen(false)}
         open={isDrawerOpen}
         width={500}
@@ -1380,8 +1069,6 @@ const RequestPlatform: React.FC = () => {
             },
           ]}
         />
-
-        {/* คุณสามารถ map ข้อมูลจริงมาที่นี่ได้ */}
       </Drawer>
 
 

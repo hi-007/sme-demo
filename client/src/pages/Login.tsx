@@ -13,19 +13,12 @@ const Login: React.FC = () => {
     const navigate = useNavigate();
 
     const onFinish = () => {
-        // ✅ คลิก Login แล้วไป CRM SME
         navigate("/crm-sme");
     };
-
-    //   const onFinish = (values: any) => {
-    //     console.log("Success:", values);
-    //     navigate("/crm-sme");
-    //   };
 
     return (
         <div className="relative overflow-hidden h-screen ">
             <div className="grid grid-cols-12 gap-3 h-screen bg-white">
-                {/* Left Side */}
                 <div className="bg-[#182237] text-white xl:col-span-4 lg:col-span-4 col-span-12 lg:block hidden relative overflow-hidden flex-col justify-center px-12">
                     <svg
                         width="800"
@@ -84,7 +77,6 @@ const Login: React.FC = () => {
                     </svg>
                 </div>
 
-                {/* Right Side */}
                 <div className="xl:col-span-8 lg:col-span-8 col-span-12 sm:px-12 px-4">
                     <div className="flex h-screen items-center px-3 lg:justify-start justify-center">
                         <div className="max-w-[420px] w-full mx-auto">
@@ -106,36 +98,6 @@ const Login: React.FC = () => {
                                 </div>
                             </div>
 
-
-                            {/* Social Login */}
-                            {/* <div className="flex gap-3 mb-4">
-                                <Button
-                                    icon={<GoogleOutlined />}
-                                    className="flex-1 rounded-lg border border-[#d1d5db] bg-white font-medium shadow-none h-11 text-base hover:bg-[#f4f7fa]"
-                                    size="middle"
-                                    block
-                                >
-                                    Google
-                                </Button>
-                                <Button
-                                    icon={<FacebookFilled />}
-                                    className="flex-1 rounded-lg border border-[#d1d5db] bg-white font-medium shadow-none h-11 text-base hover:bg-[#f4f7fa]"
-                                    size="middle"
-                                    block
-                                >
-                                    Facebook
-                                </Button>
-                            </div> */}
-
-                            {/* <div className="flex items-center mb-4 mt-4">
-                                <div className="flex-1 h-px bg-[#ececec]" />
-                                <span className="mx-4 text-[#7d8898] text-[15px] font-medium whitespace-nowrap">
-                                    or sign in with
-                                </span>
-                                <div className="flex-1 h-px bg-[#ececec]" />
-                            </div> */}
-
-                            {/* Ant Design Form with Tailwind */}
                             <Form
                                 layout="vertical"
                                 initialValues={{ remember: true }}

@@ -6,10 +6,7 @@ import {
     Button,
     Badge,
     Avatar,
-    Dropdown,
-    //Card,
-    // Col,
-    // Row
+    Dropdown
 } from "antd";
 import {
     UserOutlined,
@@ -18,9 +15,6 @@ import {
 const { Header, Sider, Content } = Layout;
 import { Outlet, useLocation, Link } from "react-router-dom";
 import BreadcrumbNav from "./components/BreadcrumbNav";
-
-
-/* ✅ เมนู Sidebar */
 
 type MenuItem = Required<MenuProps>["items"][number];
 const items: MenuItem[] = [
@@ -50,14 +44,7 @@ const items: MenuItem[] = [
             { key: "9", label: "รายงานสถิติการลงทะเบียนเข้าร่วมโครงการ" },
             { key: "10", label: "รายงานแบบประเมินความรู้ความเข้าใจ" },
             { key: "11", label: "รายงานแบบประเมินความพึงพอใจ" },
-            // {
-            //     key: "sub3",
-            //     label: "Submenu",
-            //     children: [
-            //         { key: "11", label: "Option 11" },
-            //         { key: "12", label: "Option 12" },
-            //     ],
-            // },
+
         ],
     },
     {
@@ -71,7 +58,6 @@ const CRMLayout: React.FC = () => {
     const [collapsed, setCollapsed] = useState(false);
     const location = useLocation();
     /*---------------------------------------------------------------------------------*/
-    // ✅ เมนูโปรไฟล์
     const profileMenu: MenuProps["items"] = [
         {
             key: "1",
@@ -89,8 +75,7 @@ const CRMLayout: React.FC = () => {
     ];
     /*---------------------------------------------------------------------------------*/
     const breadcrumbNameMap: Record<string, string> = {
-        "/crm-sme": "Dashboard", // ✅ กรณีอยู่หน้า root layout
-        //"/crm-sme/dashboard": "Dashboard",
+        "/crm-sme": "Dashboard",
         "/crm-sme/home": "Dashboard",
         "/crm-sme/company": "ข้อมูลบริษัท/หน่วยงาน",
         "/crm-sme/platform": "บริหารจัดการคำขอการใช้งานแพลตฟอร์ม",
@@ -99,7 +84,6 @@ const CRMLayout: React.FC = () => {
     };
 
     const hideBreadcrumb = location.pathname === "/crm-sme/dashboard";
-
 
     /*---------------------------------------------------------------------------------*/
 
@@ -134,10 +118,8 @@ const CRMLayout: React.FC = () => {
 
             </Sider>
 
-            {/* Main Content */}
             <Layout className="bg-[#f8fafd]">
                 <Header className="bg-transparent pl-6 pt-6 flex items-center justify-between">
-                    {/* Left: Toggle */}
                     <div className="flex justify-center items-center h-full">
                         <Button
                             type="text"
@@ -198,7 +180,6 @@ const CRMLayout: React.FC = () => {
                         />
                     </div>
 
-                    {/* Right: Notifications + Profile */}
                     <div className="flex items-center gap-4">
                         <Badge count={5} size="small" className="mr-4">
                             <Button
@@ -217,8 +198,7 @@ const CRMLayout: React.FC = () => {
                             arrow
                         >
                             <Avatar
-                            style={{ backgroundColor: '#f56a00' }} size="large"
-                                //size="large"
+                                style={{ backgroundColor: '#f56a00' }} size="large"
                                 icon={<UserOutlined />}
                                 className="cursor-pointer "
                             />
@@ -226,22 +206,8 @@ const CRMLayout: React.FC = () => {
                     </div>
                 </Header>
 
-
-                {/* <div className="flex items-end justify-between px-6 pt-8">
-                    {!hideBreadcrumb && (
-                        <div className="font-sans">
-                            <BreadcrumbNav
-                                breadcrumbNameMap={breadcrumbNameMap}
-                                homePath="/crm-sme"
-                                homeLabel="Dashboard"
-                            />
-                        </div>
-                    )}
-                </div> */}
-
                 <div className="font-sans mt-10 mb-0 px-8">
-                    {/* Breadcrumb */}
-                    {/* Only show Breadcrumb if not on the dashboard */}
+
                     {!hideBreadcrumb && (
                         <div className="font-sans">
                             <BreadcrumbNav

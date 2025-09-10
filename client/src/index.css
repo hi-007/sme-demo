@@ -13,9 +13,6 @@
     @apply border-border;
   }
 
-  /* body {
-    @apply bg-gradient-to-br from-slate-50 to-blue-50 text-foreground min-h-screen;
-  } */
 }
 
 
@@ -178,31 +175,26 @@
 
 /* MEMU */
 
-/* ✅ Hover ของเมนูหลัก */
 .custom-menu .ant-menu-item:hover {
   background-color: #102d47 !important;
 }
 
-/* ✅ Hover ของ Submenu Title */
 .custom-menu .ant-menu-submenu-title:hover {
   background-color: #102d47 !important;
 }
 
-/* ✅ Hover ของ Item ข้างใน Submenu */
 .custom-menu .ant-menu-sub {
-  background-color: #08162b !important; /* คงพื้นหลังเข้ม */
+  background-color: #08162b !important;
 }
 
 .custom-menu .ant-menu-sub .ant-menu-item:hover {
   background-color: #102d47 !important;
 }
 
-/* ✅ Active / Selected (เมนูหลัก + Submenu + Item ข้างใน) */
 .custom-menu .ant-menu-item-selected {
   background-color: #102d47 !important;
 }
 
-/* ✅ เปลี่ยนสี Icon และ Text ให้ขาวตอน Hover */
 .custom-menu .ant-menu-item:hover .ant-menu-title-content,
 .custom-menu .ant-menu-item:hover .ant-menu-item-icon,
 .custom-menu .ant-menu-submenu-title:hover .ant-menu-item-icon {
@@ -214,18 +206,15 @@
   color: #ffffff !important;
 }
 
-/* ✅ เพิ่ม Animation ให้ Hover นุ่ม */
 .custom-menu .ant-menu-item,
 .custom-menu .ant-menu-submenu-title {
   transition: background-color 0.2s ease;
 }
 
-
-/* ปรับขนาดกล่อง OTP ให้ใหญ่ขึ้น + ระยะห่าง */
-:where(.ant-otp) .ant-otp-input-wrapper { gap: 12px; }          /* ช่องไฟระหว่างกล่อง */
+:where(.ant-otp) .ant-otp-input-wrapper { gap: 12px; }         
 :where(.ant-otp) .ant-otp-input { 
-  width: 64px;                                                  /* ความกว้างกล่อง */
-  height: 64px;                                                 /* ความสูงกล่อง */
+  width: 64px;                                                 
+  height: 64px;                                                 
   border-radius: 12px;
   font-size: 24px;
 
@@ -233,7 +222,6 @@
 /* //////////////////////////////////////// */
 
 
-/* ใน CSS ของคุณ */
  .dashboard-card {
     @apply bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300;
   }

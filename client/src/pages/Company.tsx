@@ -8,7 +8,6 @@ const Company: React.FC = () => (
     <p className="text-gray-600">รายละเอียดข้อมูลบริษัท/หน่วยงาน</p>
   </Card>
 
-  
 );
 
 export default Company;
