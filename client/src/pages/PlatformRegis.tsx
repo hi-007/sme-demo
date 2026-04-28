@@ -398,7 +398,7 @@ const PlatformRegis = () => {
                       label="เว็บไซต์"
                       name="website_name"
                     >
-                      <Input />
+                      <Input/>
                     </Form.Item>
                     <Divider className="font-sans pt-4">หมวดที่ 2: ประเมินขนาดกิจการ</Divider>
                     <Form.Item
